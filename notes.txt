@@ -176,3 +176,71 @@ Ideas:
 	- if no completions found (possible misspell), complete from the longest previous substring that can be completed
 
 	- map misspell optimally onto char tree and use this to get relevant corrections
+
+
+
+
+
+
+
+
+
+
+EXAMPLES OF USE -----------------------------------------------------------------------------------------
+
+CAN we differentiate between words that are completed by the user because they didn't want a completion, 
+and those that were completed by the user but they would have preferred it to be completed by us
+
+word: "cheese"
+
+c	// traverse to 'c' node from root
+ch	// traverse from 'c' to 'h' child	(really inexpensive)
+che	// traverse from 'h' to 'e' child
+
+*pause* (exceeds threshold) --> now try to find completions (more expensive) at current point in trie
+
+chee
+chees
+
+*pause* again --> this overwrites previous set of completions (this is what we look at if they end up completing themselves)
+
+cheese
+**space** --> this triggers word ending
+
+search down as they type, storing pointer to most recent node (tracepoint)
+	but only giving completions at pause
+
+
+-------------------------------------------
+Example with backspacing and then completing:
+
+a
+au
+aut
+auto
+autoc
+
+auto (Backspace) trash all the data here
+\t		trigger search (this is okay because in the search func I'll realize there's no tracepoint, and trace to 'auto')
+
+-------------------------------------------
+Example with backspacing and retyping:
+word: "autocomplete"
+
+a
+au
+aut
+auto
+autoc
+autoco (at this point i've traced down to 'autoco')
+
+autoc	(NOW, a backspace) at this moment: metadata (about tabs), set of completions, and tracepoint are all thrown out the window (if they exist thus far)
+
+auto (another backspace)
+
+autom (now they start typing again) I realize we don't have a tracepoint, so I trace to 'autom' RIGHT NOW (I know to trace to 'autom' by getting last fragment of current chat string)
+
+automa			continue tracing as normal
+\t or pause		trigger search for completions
+
+-------------------------------------------
