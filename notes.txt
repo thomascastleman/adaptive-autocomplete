@@ -1,0 +1,178 @@
+
+CLIENT SIDE: ---------------------------------------------------
+
+OFFERING COMPLETIONS IN THE UI:
+	to show completions, offer small amount (3 or 4) just above word (these are ordered by their probs)
+	by pressing tab repeatedly, user selects each word
+	if user gets to end of 3 or 4 words and continues, more results are shown (cause they're already found by the search
+
+User enters application (or enters room?):
+
+		receive STABLE char trie from DB and construct local version
+		receive current room chat data, use as corpus to construct local wordtree(?)
+
+		KEY LISTENERS: (how we listen for and interpret keyboard input)
+
+			DATA we maintain:
+				String fragment;			// the current substring fragment from which we're completing
+				Node * tracepoint;			// pointer to lowest node we've traced down in tree
+				bool tabbed;				// did user tab over completions in most recent offering?
+				bool offeringCompletions;	// are completions currently being offered (changes function of some keys)
+				bool ranSearch;				// was a search attempted at some point throughout typing
+				Node[] completions;			// set of completions found so far, if exist
+
+
+			on 'any normal char':
+				if offeringCompletions:
+					offeringCompletions = false
+					remove display of completions
+
+				add to fragment
+				if no tracepoint exists:
+					trace all the way
+				else:
+					just trace down another char
+
+			on '\t' or pause exceeding threshold:
+				if not offeringCompletions:
+					offeringCompletions = true
+					reset tabbed to false
+
+					if no completions already exist:
+						completions = run search on current fragment
+					otherwise:
+						remove all which are no longer possible
+						reset each one's visibility attribute
+
+					render completions
+
+				otherwise:
+					tab means scroll to next completion option being displayed
+					update visibility attr of new completion being displayed
+
+			on 'enter':
+				if offeringCompletions:
+					accept and fill currently highlighted completion
+					send server completion ('completion accepted')
+					clear EVERYTHING
+				otherwise:
+					send chat message
+					and also clear EVERYTHING I guess
+
+			on '\b':
+				clear completions[]
+				clear tracepoint
+				reset tabbed
+				offeringCompletions = false
+				ranSearch = false
+
+			on ' ':	// completion without alg's help
+				get last word in chat string
+
+				if alg didn't get to run (!ranSearch) : ignore and don't do anything
+				otherwise:
+
+				"user saw word but didnt want completion"
+				if word was visible (as in it was loaded at some point) and user DIDNT tab:
+					decrement
+
+
+				"user saw word and wanted completion... but didnt" (wtf? this do no logic)
+				if word was visible AND user tabbed: (but remember they still completed on their own)
+					not sure what to do here (cause this situation makes no sense)
+
+
+				"user didnt see word but didnt want a completion"
+				if word was not ever visible (never loaded into view) AND user never tabbed over at all:
+					decrement
+
+
+				"user didnt see word but did want a completion"
+				if was not ever visible AND user tabbed (looking for a completion):
+					increment
+
+
+				Now clear EVERYTHING (starting a new fragment, new completions...)
+
+
+FOR INCREMENT / DECREMENT:
+	trace
+		if no exist & increment, create branch
+		if no exist & decrement, do nothing
+
+		increment / decrement local prob, and delta for that node
+			if exceeds inc / dec threshold:
+				send to server
+
+
+
+SERVER-SIDE ----------------------------------------------------------------------------------------------
+
+Database tree serialization
+
+STABLE CHAR Tree (gets distributed on client connection)
+UNSTABLE CHAR Tree (gets updated dynamically)
+NOVELTY CHAR Tree (holds new entries temporarily)
+
+on client connection:
+	dump all STABLE db tree data on client
+	dump current room data on client 
+
+	on 'completion accepted':
+			match completion into UNSTABLE tree, increment terminal prob of last node
+
+	on 'increment':
+		trace word
+
+		if no exist in UNSTABLE:
+			if no exist in NOVELTY:
+					insert into NOVELTY:
+				else:
+					update user prob
+			otherwise:
+				increment prob in UNSTABLE	
+
+	on 'decrement':
+		trace word
+			decrement prob (or to 0)
+
+
+TRIE FILTERING: -------------------------------------------------------
+
+Tree Filter: pruning, and combining of master tree with novelty tree to yield a new master version to be distributed
+	PRUNING:
+		- prune all nodes with terminal probability 0 (aka they're not going to be a completion)
+				(as in, actually prune if single strand branch, don't do anything if not)
+				- maybe prune lowest term. probability node by recentering all probs so that one is 0
+
+	- anything over a certain user prob threshold in NOVELTY tree gets added into master with initial terminal prob 1
+			(so its integrity can grow as users continue to use it)
+
+
+
+CLASS IDEAS: ---------------------------------------------------------
+
+
+Node {
+		string data
+		int localDelta						// this is added locally (clientside)
+		int terminalNodeProbability
+		Node [] children
+}
+
+
+TRIES: -----------------------------------------------------------------
+
+Word Tree:
+
+- maybe word trie only gets searched on space trigger
+	- so, at inception of new word, when no character completions can possibly be found
+		- word tree is queried to offer relevant completions
+
+
+AUTOCORRECT (?) --------------------------------------------------------
+
+Ideas:
+	- if no completions found (possible misspell), complete from the longest previous substring that can be completed
+
+	- map misspell optimally onto char tree and use this to get relevant corrections
