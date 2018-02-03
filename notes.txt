@@ -299,4 +299,5 @@ autom (now they start typing again) I realize we don't have a tracepoint, so I t
 automa			continue tracing as normal
 \t or pause		trigger search for completions
 
+
 -------------------------------------------

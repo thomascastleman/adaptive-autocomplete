@@ -1,0 +1,30 @@
+{
+  "name": "adaptive-autocomplete",
+  "version": "1.0.0",
+  "description": "A web-based, dynamically-updated autocompletion algorithm",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thomascastleman/adaptive-autocomplete.git"
+  },
+  "keywords": [
+    "autocomplete"
+  ],
+  "author": "Johnny Lindbergh and Thomas Castleman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/thomascastleman/adaptive-autocomplete/issues"
+  },
+  "homepage": "https://github.com/thomascastleman/adaptive-autocomplete#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "http": "0.0.0",
+    "moment": "^2.20.1",
+    "mustache-express": "^1.2.5",
+    "socket.io": "^2.0.4"
+  }
+}
