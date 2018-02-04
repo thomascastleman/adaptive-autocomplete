@@ -40,6 +40,7 @@ User enters application (or enters room?):
 
 					if no completions already exist:
 						completions = run search on current fragment
+						record that search was run (ranSearch)
 					otherwise:
 						remove all which are no longer possible
 						reset each one's visibility attribute
