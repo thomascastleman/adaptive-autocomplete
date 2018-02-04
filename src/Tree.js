@@ -74,4 +74,40 @@ module.exports = function(_treeQuality) {
 			parent.children.push(n);
 		}
 	}
+
+	// asynchronously trace from a node to one of its childs which matches given data
+	this.traceToChild = function(node, data, callback) {
+
+	}
+
+	// trace a section down tree as far as possible
+	this.traceFullSection = function(section) {
+
+	}
+
+	// search the subtree rooted at a given node for all terminal node completions
+	this.getSubtreeCompletions = function(node, fragment) {
+
+	}
+
+	// add a new branch starting from a given node
+	this.addSection = function(node, section) {
+
+	}
+
+	// trace word into tree and increment terminal probability, create branch if nonexistent
+	this.increment = function(word) {
+
+	}
+
+	// trace word into tree and decrement terminal probability
+	this.decrement = function(word) {
+
+	}
+
+	// train wordtree on corpus of text
+	this.train = function(data) {
+
+	}
+
 }

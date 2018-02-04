@@ -5,6 +5,14 @@ var Tree;
 var charTree;
 var wordTree;
 
+// completion data
+var fragment;				// (string) the current substring fragment from which we're completing
+var tracepoint;				// (Node) pointer to lowest node we've traced down in tree
+var tabbed;					// (bool) did user tab over completions in most recent offering?
+var offeringCompletions;	// (bool) are completions currently being offered (changes function of some keys)
+var ranSearch;				// (bool) was a search attempted at some point throughout typing
+var completions = [];		// (Node[]) set of completions found so far, if exist
+
 $(document).ready(function() {
 
 	socket = io();	// init socket connection
