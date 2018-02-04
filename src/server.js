@@ -33,7 +33,9 @@ stableTree.root.children.push(new Node('a', 10));
 stableTree.root.children.push(new Node('c', 20));
 stableTree.root.children[0].children.push(new Node('r', 5));
 stableTree.root.children[0].children.push(new Node('n', 7));
-stableTree.root.children[1].children.push(new Node('x', 300));
+stableTree.root.children[1].children.push(new Node('a', 16));
+stableTree.root.children[1].children[0].children.push(new Node('t', 15));
+
 
 server.listen(port, function() {
 	console.log("Autocomplete server listening on port %d", port);

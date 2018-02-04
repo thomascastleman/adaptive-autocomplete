@@ -77,7 +77,15 @@ module.exports = function(_treeQuality) {
 
 	// asynchronously trace from a node to one of its childs which matches given data
 	this.traceToChild = function(node, data, callback) {
-
+		var child;
+		for (var i = 0; i < node.children.length; i++) {
+			var n = node.children[i];
+			if (n.data == data) {
+				child = n;
+				break;
+			}
+		}
+		callback(child);
 	}
 
 	// trace a section down tree as far as possible
