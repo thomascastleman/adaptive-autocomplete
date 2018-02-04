@@ -9,7 +9,8 @@ module.exports = function(socket) {
 		// send all necessary data on connection
 		sock.emit('initial data', {
 			node_class: Node.toString(),
-			tree_class: Tree.toString()
+			tree_class: Tree.toString(),
+			tree_data: global.stableTree.serialize()
 		});
 	});
 
