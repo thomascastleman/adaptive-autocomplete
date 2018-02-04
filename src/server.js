@@ -23,16 +23,16 @@ var Database		= require('./Database.js');
 
 var port = 8080;
 
-var t = new Tree(0);
 
+// debug
+var t = new Tree(0);
 t.root.children.push(new Node('a', 10));
 t.root.children.push(new Node('c', 20));
 t.root.children[0].children.push(new Node('r', 5));
 t.root.children[0].children.push(new Node('n', 7));
+t.root.children[1].children.push(new Node('x', 300));
 
 var cereal = t.serialize();
-
-console.log(cereal);
 
 var reconstruct = JSON.parse(cereal);
 for (var i = 0; i < reconstruct.length; i++) {

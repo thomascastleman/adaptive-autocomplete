@@ -2,50 +2,38 @@ var constants = require('./constants.js');
 var Node = require('./Node.js');
 
 module.exports = function(_treeQuality) {
+	
 	this.treeQuality = _treeQuality;
-	this.root = new Node(undefined, 0);
-
+	this.root = new Node(undefined, undefined);
 
 	this.serialize = function() {
 
-		var allNodes = [];
+		var allNodes = []; 				// every node in tree
+		var numChildren = new Array();	// map of node id to number of children
+		var currentNode;				// current node being serialized
+		var currentID = 0;				// id of node
+		var currentParentID = -1;		// id of parent
+		var currentNumChildren = 1;		// num children remaining to be serialized of this parent
+		var q = [this.root];			// queue starts with just root
 
-		var currentNode = Object.assign({}, this.root);	// copy root node
-		currentNode.id = 0;
-
-		allNodes.push(currentNode);
-
-		var currentID = 1;
-		var currentParentID = 0;
-		var currentNumChildren = this.root.children.length;
-
-		var q = this.root.children;
-
-
+		// while still nodes left to serialize
 		while (q.length > 0) {
+			currentNode = q.shift();								// pop from queue
+			q.push.apply(q, currentNode.children);					// add children to q
+			numChildren[currentID] = currentNode.children.length;	// get number of children off this id
 
-
-
-			currentNode = q.shift();
-			q.push.apply(q, currentNode.children);
-
-			if (currentNumChildren == 0) {
-				currentParentID++;
-				currentNumChildren = 
-			}
-
-			var copy = Object.assign({}, currentNode);
-
-			copy.id = currentID++;
-			// currentID++;
-
-			copy.parentID = currentParentID++;
-			// currentParentID++;
-
+			// make modified copy
+			var copy = Object.assign({id: currentID++, parentID: currentParentID}, currentNode);
+			delete copy.children;
 			allNodes.push(copy);
 
+			// decrease num children left to serialize from this parent
 			currentNumChildren--;
-
+			if (currentNumChildren == 0) {
+				// move to next parent if out of children
+				currentParentID++;
+				currentNumChildren = numChildren[currentParentID];
+			}
 		}
 
 		return JSON.stringify(allNodes);
