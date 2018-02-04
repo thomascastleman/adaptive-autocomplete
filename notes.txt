@@ -6,10 +6,15 @@ OFFERING COMPLETIONS IN THE UI:
 	by pressing tab repeatedly, user selects each word
 	if user gets to end of 3 or 4 words and continues, more results are shown (cause they're already found by the search
 
+	Word Tree:
+		- maybe word trie only gets searched on space trigger
+			- so, at inception of new word, when no character completions can possibly be found
+				- word tree is queried to offer relevant completions
+
 User enters application (or enters room?):
 
 		receive STABLE char trie from DB and construct local version
-		receive current room chat data, use as corpus to construct local wordtree(?)
+		receive current room chat data, use as corpus to construct local wordtree
 
 		KEY LISTENERS: (how we listen for and interpret keyboard input)
 
@@ -33,12 +38,16 @@ User enters application (or enters room?):
 				else:
 					just trace down another char
 
-			on '\t' or pause exceeding threshold:
+			on '\t' or pause exceeding threshold: (they want completions)
 				if not offeringCompletions:
 					offeringCompletions = true
 					reset tabbed to false
 
-					if no completions already exist:
+					if fragment is empty: 
+						search word tree for completions
+						act like a search didn't happen
+
+					else if no completions already exist:
 						completions = run search on current fragment
 						record that search was run (ranSearch)
 					otherwise:
@@ -96,17 +105,6 @@ User enters application (or enters room?):
 				Now clear EVERYTHING (starting a new fragment, new completions...)
 
 
-FOR INCREMENT / DECREMENT:
-	trace
-		if no exist & increment, create branch
-		if no exist & decrement, do nothing
-
-		increment / decrement local prob, and delta for that node
-			if exceeds inc / dec threshold:
-				send to server
-
-
-
 SERVER-SIDE ----------------------------------------------------------------------------------------------
 
 Database tree serialization
@@ -162,13 +160,71 @@ Node {
 }
 
 
-TRIES: -----------------------------------------------------------------
+Tree {
+	
+	int treeType --> denotes CHAR or WORD
+	int treeQuality --> denotes STABLE, UNSTABLE, or NOVELTY
+	Node root
 
-Word Tree:
+	Node traceToChild(Node, String)
+		trace from a given node to its child which matches the char given (involves binary search / alphabetical comparison)
+		if no child found, return null;
 
-- maybe word trie only gets searched on space trigger
-	- so, at inception of new word, when no character completions can possibly be found
-		- word tree is queried to offer relevant completions
+	Object traceFullSection(String[])
+		trace a section from root as far as you can down the tree
+
+		if whole section found:
+			return {node: pointer to last node, remainingSection: nothing}
+
+		if only part of section found:
+			return {node: pointer to lowest node we found, remainingSection: String[] of the rest of the section we haven't found}
+
+	Object[] getSubtreeCompletions(Node, String[])
+		search the subtree rooted at a given node for all word completions
+		the string given is the current fragment (path down the tree)
+
+		while we search down (depth first), the current "path" string is maintained and this represents the full string value of each node
+
+		any time a terminal node is reached, construct obj from path string and node, and push to array of results
+			push IN ORDER (by terminal probability) (this could be binary search)
+
+		Return: an ordered array of objs which look like this: {completion: "full word string", node: Node}
+
+	void addSection(Node, String[])
+		add a new section to the tree, starting from a given node
+
+
+	// CHAR TREE FUNCTIONALITY:
+
+		void increment(String)
+			traceFullString()
+			if full string found (no remainingChars):
+				increment that node probability & local delta
+				if delta exceeds threshold, ping server
+			otherwise:
+				add section using remainingChars, starting from the node traceFullString() gave us 
+
+		void decrement(String)
+			traceFullString()
+			if full string found:
+				decrement node probability & local delta (but don't let it be negative)
+				if delta exceeds threshold, ping server
+
+
+	// WORD TREE FUNCTIONALITY:
+
+			void train(String[])
+				look at every ngram
+					traceFullPhrase() on ngram
+					if whole thing found, increment last node prob
+					otherwise:
+						addsection on the last node we found, with the remaining string data 
+
+}
+
+
+
+
 
 
 AUTOCORRECT (?) --------------------------------------------------------
@@ -243,5 +299,6 @@ autom (now they start typing again) I realize we don't have a tracepoint, so I t
 
 automa			continue tracing as normal
 \t or pause		trigger search for completions
+
 
 -------------------------------------------
