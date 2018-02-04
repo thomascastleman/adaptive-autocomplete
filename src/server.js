@@ -32,14 +32,13 @@ t.root.children[0].children.push(new Node('r', 5));
 t.root.children[0].children.push(new Node('n', 7));
 t.root.children[1].children.push(new Node('x', 300));
 
-var cereal = t.serialize();
+var reconstruct = new Tree(0);
+reconstruct.construct(t.serialize());
 
-var reconstruct = JSON.parse(cereal);
-for (var i = 0; i < reconstruct.length; i++) {
-	console.log(reconstruct[i]);
-}
+reconstruct.log();
+
+
 
 server.listen(port, function() {
 	console.log("Autocomplete server listening on port %d", port);
 });
-
