@@ -1,6 +1,4 @@
-DROP DATABASE IF EXISTS autocomplete;
-CREATE DATABASE autocomplete;
+DROP DATABASE IF EXISTS adaptive_complete;
+CREATE DATABASE adaptive_complete;
 
-USE autocomplete;
-
-
+USE adaptive_complete;
