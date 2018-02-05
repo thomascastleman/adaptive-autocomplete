@@ -63,6 +63,7 @@ User enters application (or enters room?):
 			on 'enter':
 				if offeringCompletions:
 					accept and fill currently highlighted completion
+					increment prob (don't search -- we have instant access)
 					send server completion ('completion accepted')
 					clear EVERYTHING
 				otherwise:

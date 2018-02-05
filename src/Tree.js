@@ -141,16 +141,32 @@ module.exports = function(_treeQuality) {
 	// search the subtree rooted at a given node for all terminal node completions
 	this.getSubtreeCompletions = function(node, fragment) {
 
-		var stack = [node];
+		var completions = [];
+		var stack = node.children;
 
 		while (stack.length > 0) {
 			var node = stack.pop();
-			stack.push.apply(stack, node.children);
-			
 
+			// if actual node
+			if (node) {
+				// if terminal node
+				if (node.probability > 0) {
+					// add string to completions
+					completions.push({completion: fragment.slice() + node.data, node: node});
+				} else {
+					// push separator and all children
+					stack.push(undefined);
+					stack.push.apply(stack, node.children);
+					fragment += node.data;
+				}
 
+			} else {
+				// backtrack
+				fragment = fragment.substring(0, fragment.length - 1);
+			}
 		}
 
+		return completions;
 	}
 
 	// add a new branch starting from a given node, and inserting to a given index

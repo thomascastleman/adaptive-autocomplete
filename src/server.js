@@ -29,7 +29,7 @@ global.unstableTree = new Tree(constants.UNSTABLE);
 global.noveltyTree = new Tree(constants.NOVELTY);
 
 server.listen(port, function() {
-	console.log("Autocomplete server listening on port %d", port);
+	console.log("Adaptive autocomplete server listening on port %d", port);
 });
 
 
@@ -37,19 +37,16 @@ server.listen(port, function() {
 // debug ---------------------------------------------------------
 
 
-stableTree.root.children.push(new Node('a', 10));
-stableTree.root.children.push(new Node('c', 20));
+stableTree.root.children.push(new Node('a', 0));
+stableTree.root.children.push(new Node('c', 0));
 stableTree.root.children.push(new Node('h', 21));
 stableTree.root.children.push(new Node('q', 56));
 stableTree.root.children[0].children.push(new Node('n', 7));
 stableTree.root.children[0].children.push(new Node('r', 5));
-stableTree.root.children[1].children.push(new Node('a', 16));
+stableTree.root.children[1].children.push(new Node('a', 0));
 stableTree.root.children[1].children[0].children.push(new Node('t', 15));
 
-var res = stableTree.traceFullSection(['c', 'a', 'x']);
 
-console.log(res);
+var completions = stableTree.getSubtreeCompletions(stableTree.root.children[1], "c");
 
-stableTree.addSection(res.lowest, res.insertion_index, res.remainingBranch);
-
-stableTree.log();
+console.log(completions);
