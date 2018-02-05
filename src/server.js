@@ -28,6 +28,8 @@ global.stableTree = new Tree(constants.STABLE);
 global.unstableTree = new Tree(constants.UNSTABLE);
 global.noveltyTree = new Tree(constants.NOVELTY);
 
+
+
 // debug
 stableTree.root.children.push(new Node('a', 10));
 stableTree.root.children.push(new Node('c', 20));
@@ -38,10 +40,7 @@ stableTree.root.children[0].children.push(new Node('n', 7));
 stableTree.root.children[1].children.push(new Node('a', 16));
 stableTree.root.children[1].children[0].children.push(new Node('t', 15));
 
-stableTree.traceToChild(stableTree.root, 'q', function(node) {
-	console.log("Node: ");
-	console.log(JSON.stringify(node));
-});
+console.log(stableTree.traceFullSection(['c', 'a', 'q']));
 
 server.listen(port, function() {
 	console.log("Autocomplete server listening on port %d", port);

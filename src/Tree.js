@@ -113,7 +113,25 @@ module.exports = function(_treeQuality) {
 
 	// trace a section down tree as far as possible
 	this.traceFullSection = function(section) {
+		var lowest = this.root;
+		var result;
 
+		for (var i = 0; i < section.length; i++) {
+			// trace from current lowest to child with matching data
+			this.traceToChild(lowest, section[i], function(node) {
+				if (!node) {
+					// return lowest node found, and remaining section to trace
+					result = {lowest: lowest, remainingSection: section.slice(i, section.length)};
+				} else {
+					lowest = node;	// move to child node
+				}
+			});
+			// if disagreement, return
+			if (result) return result;
+		}
+
+		// return terminal node and empty remaining section
+		return {lowest: lowest, remainingSection: []};
 	}
 
 	// search the subtree rooted at a given node for all terminal node completions
