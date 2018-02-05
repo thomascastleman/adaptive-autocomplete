@@ -75,17 +75,40 @@ module.exports = function(_treeQuality) {
 		}
 	}
 
+	// return true if string A comes alphabetically before B, false otherwise
+	this.alphaLessThan = function(strA, strB) {
+		// this doesn't support word comparison YET
+		return strA.charCodeAt(0) < strB.charCodeAt(0);
+	}
+
 	// asynchronously trace from a node to one of its childs which matches given data
 	this.traceToChild = function(node, data, callback) {
-		var child;
-		for (var i = 0; i < node.children.length; i++) {
-			var n = node.children[i];
-			if (n.data == data) {
-				child = n;
+		var matchingChild;
+		var min = 0;
+		var max = node.children.length;
+		var halfway, h;
+
+		while (true) {
+			// calculate halfway index and get node
+			halfway = Math.floor((max - min) / 2) + min;
+			h = node.children[halfway];
+
+			// if match found
+			if (h.data == data) {
+				matchingChild = h;
 				break;
+			// if halfway node comes before
+			} else if (this.alphaLessThan(h.data, data)) {
+				min = halfway + 1;
+			// if halfway node comes after
+			} else {
+				max = halfway;
 			}
+
+			if (min == max) break;
 		}
-		callback(child);
+
+		callback(matchingChild);
 	}
 
 	// trace a section down tree as far as possible

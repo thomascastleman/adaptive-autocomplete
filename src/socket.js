@@ -10,7 +10,7 @@ module.exports = function(socket) {
 		sock.emit('initial data', {
 			node_class: Node.toString(),
 			tree_class: Tree.toString(),
-			tree_data: global.stableTree.serialize()
+			tree_data: global.stableTree.serialize(),
 		});
 	});
 

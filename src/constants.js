@@ -1,11 +1,8 @@
 
-
-var CONSTANTS = {
+module.exports = {
 
 	STABLE: 0,
 	UNSTABLE: 1,
 	NOVELTY: 2
 
 };
-
-module.exports = CONSTANTS;
