@@ -115,17 +115,17 @@ module.exports = function(_treeQuality) {
 		callback(result);
 	}
 
-	// trace a section down tree as far as possible
-	this.traceFullSection = function(section) {
+	// trace a branch down tree as far as possible
+	this.traceFullSection = function(branch) {
 		var lowest = this.root;
 		var result;
 
-		for (var i = 0; i < section.length; i++) {
+		for (var i = 0; i < branch.length; i++) {
 			// trace from current lowest to child with matching data
-			this.traceToChild(lowest, section[i], function(data) {
+			this.traceToChild(lowest, branch[i], function(data) {
 				if (!data.matchingChild) {
-					// return lowest node found, remaining section to trace, and where to insert
-					result = {lowest: lowest, remainingSection: section.slice(i, section.length), insertion_index: data.insertion_index};
+					// return lowest node found, remaining branch to trace, and where to insert
+					result = {lowest: lowest, remainingBranch: branch.slice(i, branch.length), insertion_index: data.insertion_index};
 				} else {
 					lowest = data.matchingChild;	// move to child node
 				}
@@ -134,22 +134,32 @@ module.exports = function(_treeQuality) {
 			if (result) return result;
 		}
 
-		// return terminal node and empty remaining section
-		return {lowest: lowest, remainingSection: []};
+		// return terminal node and empty remaining branch
+		return {lowest: lowest, remainingBranch: []};
 	}
 
 	// search the subtree rooted at a given node for all terminal node completions
 	this.getSubtreeCompletions = function(node, fragment) {
 
+		var stack = [node];
+
+		while (stack.length > 0) {
+			var node = stack.pop();
+			stack.push.apply(stack, node.children);
+			
+
+
+		}
+
 	}
 
 	// add a new branch starting from a given node, and inserting to a given index
-	this.addSection = function(node, insertion_index, section) {
-		if (section.length > 0) {
+	this.addSection = function(node, insertion_index, branch) {
+		if (branch.length > 0) {
 			var currentNode = node;	// start at last matching node
 
-			while(section.length > 0) {
-				var child = new Node(section.shift(), undefined);			// init new node
+			while(branch.length > 0) {
+				var child = new Node(branch.shift(), undefined);			// init new node
 				currentNode.children.splice(insertion_index, 0, child);		// add child to children of current node
 				currentNode = child;										// move to child
 				insertion_index = 0;										// (after initial use, insertion index defaults to 0)

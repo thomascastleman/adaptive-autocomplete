@@ -50,6 +50,6 @@ var res = stableTree.traceFullSection(['c', 'a', 'x']);
 
 console.log(res);
 
-stableTree.addSection(res.lowest, res.insertion_index, res.remainingSection);
+stableTree.addSection(res.lowest, res.insertion_index, res.remainingBranch);
 
 stableTree.log();
