@@ -46,4 +46,10 @@ stableTree.root.children[0].children.push(new Node('r', 5));
 stableTree.root.children[1].children.push(new Node('a', 16));
 stableTree.root.children[1].children[0].children.push(new Node('t', 15));
 
-console.log(stableTree.traceFullSection(['c', 'a', 'x']));
+var res = stableTree.traceFullSection(['c', 'a', 'x']);
+
+console.log(res);
+
+stableTree.addSection(res.lowest, res.insertion_index, res.remainingSection);
+
+stableTree.log();

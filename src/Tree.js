@@ -143,9 +143,20 @@ module.exports = function(_treeQuality) {
 
 	}
 
-	// add a new branch starting from a given node
-	this.addSection = function(node, section) {
+	// add a new branch starting from a given node, and inserting to a given index
+	this.addSection = function(node, insertion_index, section) {
+		if (section.length > 0) {
+			var currentNode = node;	// start at last matching node
 
+			while(section.length > 0) {
+				var child = new Node(section.shift(), undefined);			// init new node
+				currentNode.children.splice(insertion_index, 0, child);		// add child to children of current node
+				currentNode = child;										// move to child
+				insertion_index = 0;										// (after initial use, insertion index defaults to 0)
+			}
+
+			currentNode.probability = 1;	// init terminal probability
+		}
 	}
 
 	// trace word into tree and increment terminal probability, create branch if nonexistent
