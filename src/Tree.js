@@ -83,7 +83,8 @@ module.exports = function(_treeQuality) {
 
 	// asynchronously trace from a node to one of its childs which matches given data
 	this.traceToChild = function(node, data, callback) {
-		var matchingChild;
+
+		var result = {};
 		var min = 0;
 		var max = node.children.length;
 		var halfway, h;
@@ -95,20 +96,23 @@ module.exports = function(_treeQuality) {
 
 			// if match found
 			if (h.data == data) {
-				matchingChild = h;
+				result.matchingChild = h;
+				delete result.insertion_index;
 				break;
 			// if halfway node comes before
 			} else if (this.alphaLessThan(h.data, data)) {
+				result.insertion_index = max;	// insert to the right
 				min = halfway + 1;
 			// if halfway node comes after
 			} else {
+				result.insertion_index = min;	// insert to the left
 				max = halfway;
 			}
 
 			if (min == max) break;
 		}
 
-		callback(matchingChild);
+		callback(result);
 	}
 
 	// trace a section down tree as far as possible
@@ -118,12 +122,12 @@ module.exports = function(_treeQuality) {
 
 		for (var i = 0; i < section.length; i++) {
 			// trace from current lowest to child with matching data
-			this.traceToChild(lowest, section[i], function(node) {
-				if (!node) {
-					// return lowest node found, and remaining section to trace
-					result = {lowest: lowest, remainingSection: section.slice(i, section.length)};
+			this.traceToChild(lowest, section[i], function(data) {
+				if (!data.matchingChild) {
+					// return lowest node found, remaining section to trace, and where to insert
+					result = {lowest: lowest, remainingSection: section.slice(i, section.length), insertion_index: data.insertion_index};
 				} else {
-					lowest = node;	// move to child node
+					lowest = data.matchingChild;	// move to child node
 				}
 			});
 			// if disagreement, return
