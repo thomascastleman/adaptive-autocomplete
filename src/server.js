@@ -39,7 +39,13 @@ server.listen(port, function() {
 stableTree.increment("tree");
 stableTree.increment("newword");
 stableTree.increment("word");
-stableTree.increment("word");
+stableTree.increment("words");
+stableTree.increment("wordsmith");
+stableTree.increment("wombat");
 
 var completions = stableTree.getSubtreeCompletions(stableTree.root, "");
 console.log(completions);
+
+
+
+// oh shit it's stopping completion search after first terminal node found --- fix this

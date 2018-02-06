@@ -199,12 +199,14 @@ module.exports = function(_treeQuality) {
 				if (node.probability > 0) {
 					// add string to completions
 					this.pushInOrder(completions, {completion: fragment.slice() + node.data, node: node});
-				} else {
+				}
+				if (node.children.length > 0) {
 					// push separator and all children
 					stack.push(undefined);
 					stack.push.apply(stack, node.children);
 					fragment += node.data;
 				}
+				
 
 			} else {
 				// backtrack
