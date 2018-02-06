@@ -87,29 +87,35 @@ module.exports = function(_treeQuality) {
 		var halfway, h;
 		var insertion;
 
-		while (true) {
+		if (array.length == 0) {
+			// push normally
+			array.push(completionData);
+		} else {
 
-			halfway = Math.floor((max - min) / 2) + min;
-			h = array[halfway];
+			while (true) {
 
-			// if same probability
-			if (h.node.probability == completionData.node.probability) {
-				array.splice(halfway, 0, completionData);	// insert into array
-				break;
-			// if halfway comes before
-			} else if (h.node.probability < completionData.node.probability) {
-				insertion = max;
-				min = halfway + 1;
-			// if halfway comes after
-			} else {
-				insertion = min;
-				max = halfway;
-			}
+				halfway = Math.floor((max - min) / 2) + min;
+				h = array[halfway];
 
-			// insert if no match in array
-			if (min == max) {
-				array.splice(insertion, 0, completionData);
-				break;
+				// if same probability
+				if (h.node.probability == completionData.node.probability) {
+					array.splice(halfway, 0, completionData);	// insert into array
+					break;
+				// if halfway comes before
+				} else if (h.node.probability > completionData.node.probability) {
+					insertion = max;
+					min = halfway + 1;
+				// if halfway comes after
+				} else {
+					insertion = min;
+					max = halfway;
+				}
+
+				// insert if no match in array
+				if (min == max) {
+					array.splice(insertion, 0, completionData);
+					break;
+				}
 			}
 		}
 	}
@@ -149,7 +155,7 @@ module.exports = function(_treeQuality) {
 	}
 
 	// trace a branch down tree as far as possible
-	this.traceFullSection = function(branch) {
+	this.traceFullSection = function(branch, callback) {
 		var lowest = this.root;
 		var result;
 
@@ -158,21 +164,25 @@ module.exports = function(_treeQuality) {
 			this.traceToChild(lowest, branch[i], function(data) {
 				if (!data.matchingChild) {
 					// return lowest node found, remaining branch to trace, and where to insert
-					result = {lowest: lowest, remainingBranch: branch.slice(i, branch.length), insertion_index: data.insertion_index};
+					result = {node: lowest, remainingBranch: branch.slice(i, branch.length), insertion_index: data.insertion_index};
+					return;
 				} else {
 					lowest = data.matchingChild;	// move to child node
 				}
 			});
-			// if disagreement, return
-			if (result) return result;
+			if (result) break;
 		}
 
+		if (!result) result = {node: lowest, remainingBranch: []};
+		console.log(result);
+
 		// return terminal node and empty remaining branch
-		return {lowest: lowest, remainingBranch: []};
+		callback(result);
 	}
 
 	// search the subtree rooted at a given node for all terminal node completions
 	this.getSubtreeCompletions = function(node, fragment) {
+		// for word tree maybe check if fragment is undefined here and just return ordered children of this node
 
 		var completions = [];
 		var stack = node.children;
@@ -185,9 +195,7 @@ module.exports = function(_treeQuality) {
 				// if terminal node
 				if (node.probability > 0) {
 					// add string to completions
-
-					// completions.push({completion: fragment.slice() + node.data, node: node});
-					pushInOrder(completions, {completion: fragment.slice() + node.data, node: node});
+					this.pushInOrder(completions, {completion: fragment.slice() + node.data, node: node});
 				} else {
 					// push separator and all children
 					stack.push(undefined);
@@ -209,8 +217,8 @@ module.exports = function(_treeQuality) {
 		if (branch.length > 0) {
 			var currentNode = node;	// start at last matching node
 
-			while(branch.length > 0) {
-				var child = new Node(branch.shift(), undefined);			// init new node
+			while (branch.length > 0) {
+				var child = new Node(branch.shift(), 0);			// init new node
 				currentNode.children.splice(insertion_index, 0, child);		// add child to children of current node
 				currentNode = child;										// move to child
 				insertion_index = 0;										// (after initial use, insertion index defaults to 0)
@@ -222,7 +230,24 @@ module.exports = function(_treeQuality) {
 
 	// trace word into tree and increment terminal probability, create branch if nonexistent
 	this.increment = function(word) {
+		var self = this;
 
+		this.traceFullSection(word.split(""), function(result) {
+			// if full word found
+			if (result.remainingBranch.length == 0) {
+				result.node.probability++;
+				if (result.node.localDelta) {
+					result.node.localDelta++;
+				} else {
+					result.node.localDelta = 1
+				}
+
+				// if delta exceeds threshold !!!
+					// ping server here
+			} else {
+				self.addSection(result.node, result.insertion_index, result.remainingBranch);
+			}
+		});
 	}
 
 	// trace word into tree and decrement terminal probability

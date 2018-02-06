@@ -37,31 +37,24 @@ server.listen(port, function() {
 // debug ---------------------------------------------------------
 
 
-stableTree.root.children.push(new Node('a', 0));
-stableTree.root.children.push(new Node('c', 0));
-stableTree.root.children.push(new Node('h', 21));
-stableTree.root.children.push(new Node('q', 56));
-stableTree.root.children[0].children.push(new Node('n', 7));
-stableTree.root.children[0].children.push(new Node('r', 5));
-stableTree.root.children[1].children.push(new Node('a', 0));
-stableTree.root.children[1].children[0].children.push(new Node('t', 15));
+// stableTree.root.children.push(new Node('a', 0));
+// stableTree.root.children.push(new Node('c', 0));
+// stableTree.root.children.push(new Node('h', 21));
+// stableTree.root.children.push(new Node('q', 56));
+// stableTree.root.children[0].children.push(new Node('n', 7));
+// stableTree.root.children[0].children.push(new Node('r', 5));
+// stableTree.root.children[1].children.push(new Node('a', 0));
+// stableTree.root.children[1].children[0].children.push(new Node('t', 15));
 
 
-// var completions = stableTree.getSubtreeCompletions(stableTree.root.children[1], "c");
 
-// console.log(completions);
+stableTree.addSection(stableTree.root, 0, "test".split(""));
+stableTree.addSection(stableTree.root, 0, "word".split(""));
+stableTree.increment("newword");
 
+stableTree.log();
 
-var t1 = new Node('a', 100);
-var t2 = new Node('b', 200);
-var t3 = new Node('c', 300);
-var t4 = new Node('d', 400);
-
-var array = [{node: t1}, {node: t2}, {node: t3}, {node: t4}];
+var completions = stableTree.getSubtreeCompletions(stableTree.root, "");
+console.log(completions);
 
 
-var n = new Node('e', 201);
-
-stableTree.pushInOrder(array, {node: n});
-
-console.log(array);
