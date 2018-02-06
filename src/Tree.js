@@ -128,27 +128,31 @@ module.exports = function(_treeQuality) {
 		var max = node.children.length;
 		var halfway, h;
 
-		while (true) {
-			// calculate halfway index and get node
-			halfway = Math.floor((max - min) / 2) + min;
-			h = node.children[halfway];
+		if (node.children.length > 0) {
+			while (true) {
+				// calculate halfway index and get node
+				halfway = Math.floor((max - min) / 2) + min;
+				h = node.children[halfway];
 
-			// if match found
-			if (h.data == data) {
-				result.matchingChild = h;
-				delete result.insertion_index;
-				break;
-			// if halfway node comes before
-			} else if (this.alphaLessThan(h.data, data)) {
-				result.insertion_index = max;	// insert to the right
-				min = halfway + 1;
-			// if halfway node comes after
-			} else {
-				result.insertion_index = min;	// insert to the left
-				max = halfway;
+				// if match found
+				if (h.data == data) {
+					result.matchingChild = h;
+					delete result.insertion_index;
+					break;
+				// if halfway node comes before
+				} else if (this.alphaLessThan(h.data, data)) {
+					result.insertion_index = max;	// insert to the right
+					min = halfway + 1;
+				// if halfway node comes after
+				} else {
+					result.insertion_index = min;	// insert to the left
+					max = halfway;
+				}
+
+				if (min == max) break;
 			}
-
-			if (min == max) break;
+		} else {
+			result.insertion_index = 0;
 		}
 
 		callback(result);
@@ -174,7 +178,6 @@ module.exports = function(_treeQuality) {
 		}
 
 		if (!result) result = {node: lowest, remainingBranch: []};
-		console.log(result);
 
 		// return terminal node and empty remaining branch
 		callback(result);
