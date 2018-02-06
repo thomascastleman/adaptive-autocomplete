@@ -47,6 +47,21 @@ stableTree.root.children[1].children.push(new Node('a', 0));
 stableTree.root.children[1].children[0].children.push(new Node('t', 15));
 
 
-var completions = stableTree.getSubtreeCompletions(stableTree.root.children[1], "c");
+// var completions = stableTree.getSubtreeCompletions(stableTree.root.children[1], "c");
 
-console.log(completions);
+// console.log(completions);
+
+
+var t1 = new Node('a', 100);
+var t2 = new Node('b', 200);
+var t3 = new Node('c', 300);
+var t4 = new Node('d', 400);
+
+var array = [{node: t1}, {node: t2}, {node: t3}, {node: t4}];
+
+
+var n = new Node('e', 201);
+
+stableTree.pushInOrder(array, {node: n});
+
+console.log(array);

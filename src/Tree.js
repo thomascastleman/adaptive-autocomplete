@@ -81,6 +81,39 @@ module.exports = function(_treeQuality) {
 		return strA.charCodeAt(0) < strB.charCodeAt(0);
 	}
 
+	this.pushInOrder = function(array, completionData) {
+		var min = 0;
+		var max = array.length;
+		var halfway, h;
+		var insertion;
+
+		while (true) {
+
+			halfway = Math.floor((max - min) / 2) + min;
+			h = array[halfway];
+
+			// if same probability
+			if (h.node.probability == completionData.node.probability) {
+				array.splice(halfway, 0, completionData);	// insert into array
+				break;
+			// if halfway comes before
+			} else if (h.node.probability < completionData.node.probability) {
+				insertion = max;
+				min = halfway + 1;
+			// if halfway comes after
+			} else {
+				insertion = min;
+				max = halfway;
+			}
+
+			// insert if no match in array
+			if (min == max) {
+				array.splice(insertion, 0, completionData);
+				break;
+			}
+		}
+	}
+
 	// asynchronously trace from a node to one of its childs which matches given data
 	this.traceToChild = function(node, data, callback) {
 
@@ -152,7 +185,9 @@ module.exports = function(_treeQuality) {
 				// if terminal node
 				if (node.probability > 0) {
 					// add string to completions
-					completions.push({completion: fragment.slice() + node.data, node: node});
+
+					// completions.push({completion: fragment.slice() + node.data, node: node});
+					pushInOrder(completions, {completion: fragment.slice() + node.data, node: node});
 				} else {
 					// push separator and all children
 					stack.push(undefined);
