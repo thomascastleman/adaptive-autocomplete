@@ -77,8 +77,19 @@ module.exports = function(_treeQuality) {
 
 	// return true if string A comes alphabetically before B, false otherwise
 	this.alphaLessThan = function(strA, strB) {
-		// this doesn't support word comparison YET
-		return strA.charCodeAt(0) < strB.charCodeAt(0);
+
+		var i = 0;
+		while (strA.charAt(i) == strB.charAt(i)) {
+			i++;
+
+			if (i >= strA.length) {
+				return true;
+			} else if (i >= strB.length) {
+				return false;
+			}
+		}
+
+		return strA.charCodeAt(i) < strB.charCodeAt(i);
 	}
 
 	// push a completion object to an array such that probability order is maintained

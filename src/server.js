@@ -36,15 +36,15 @@ server.listen(port, function() {
 
 // debug ---------------------------------------------------------
 
-stableTree.increment("tree");
-stableTree.increment("newword");
-stableTree.increment("word");
-stableTree.increment("words");
-stableTree.increment("wordsmith");
-stableTree.increment("wombat");
-stableTree.increment("wombat");
+// stableTree.increment("tree");
+// stableTree.increment("newword");
+// stableTree.increment("word");
+// stableTree.increment("words");
+// stableTree.increment("wordsmith");
+// stableTree.increment("wombat");
+// stableTree.increment("wombat");
 
-stableTree.decrement("wombat");
+// stableTree.decrement("wombat");
 
-var completions = stableTree.getSubtreeCompletions(stableTree.root, "");
-console.log(completions);
+// var completions = stableTree.getSubtreeCompletions(stableTree.root, "");
+// console.log(completions);
