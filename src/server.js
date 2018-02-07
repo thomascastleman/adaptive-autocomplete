@@ -36,15 +36,12 @@ server.listen(port, function() {
 
 // debug ---------------------------------------------------------
 
-// stableTree.increment("tree");
-// stableTree.increment("newword");
-// stableTree.increment("word");
-// stableTree.increment("words");
-// stableTree.increment("wordsmith");
-// stableTree.increment("wombat");
-// stableTree.increment("wombat");
+var wordTree = new Tree(undefined);
 
-// stableTree.decrement("wombat");
+var sentence = "here is some here is some data for the word tree to use";
 
-// var completions = stableTree.getSubtreeCompletions(stableTree.root, "");
-// console.log(completions);
+wordTree.train(sentence.split(" "), 3);
+
+wordTree.log();
+
+console.log(wordTree.getSubtreeCompletions(wordTree.root, undefined));

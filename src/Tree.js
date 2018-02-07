@@ -197,35 +197,42 @@ module.exports = function(_treeQuality) {
 
 	// search the subtree rooted at a given node for all terminal node completions
 	this.getSubtreeCompletions = function(node, fragment) {
-		// for word tree maybe check if fragment is undefined here and just return ordered children of this node
-
 		var completions = [];
-		var stack = node.children;
 
-		while (stack.length > 0) {
-			var node = stack.pop();
+		// if completing from word tree
+		if (!fragment) {
+			for (var i = 0; i < node.children.length; i++) {
+				this.pushInOrder(completions, {completion: node.children[i].data, node: node.children[i]});
+			}
 
-			// if actual node
-			if (node) {
-				// if terminal node
-				if (node.probability > 0) {
-					// add string to completions
-					this.pushInOrder(completions, {completion: fragment.slice() + node.data, node: node});
+		// if char tree
+		} else {
+			var stack = node.children;
+
+			while (stack.length > 0) {
+				var node = stack.pop();
+
+				// if actual node
+				if (node) {
+					// if terminal node
+					if (node.probability > 0) {
+						// add string to completions
+						this.pushInOrder(completions, {completion: fragment.slice() + node.data, node: node});
+					}
+					if (node.children.length > 0) {
+						// push separator and all children
+						stack.push(undefined);
+						stack.push.apply(stack, node.children);
+						fragment += node.data;
+					}
+					
+
+				} else {
+					// backtrack
+					fragment = fragment.substring(0, fragment.length - 1);
 				}
-				if (node.children.length > 0) {
-					// push separator and all children
-					stack.push(undefined);
-					stack.push.apply(stack, node.children);
-					fragment += node.data;
-				}
-				
-
-			} else {
-				// backtrack
-				fragment = fragment.substring(0, fragment.length - 1);
 			}
 		}
-
 		return completions;
 	}
 
@@ -245,6 +252,7 @@ module.exports = function(_treeQuality) {
 		}
 	}
 
+	// CHAR TREE
 	// trace word into tree and increment terminal probability, create branch if nonexistent
 	this.increment = function(word) {
 		var self = this;	// capture 'this' from tree scope
@@ -267,6 +275,7 @@ module.exports = function(_treeQuality) {
 		});
 	}
 
+	// CHAR TREE
 	// trace word into tree and decrement terminal probability
 	this.decrement = function(word) {
 		this.traceFullSection(word.split(""), function(result) {
@@ -284,8 +293,21 @@ module.exports = function(_treeQuality) {
 		});
 	}
 
+	// WORD TREE
 	// train wordtree on corpus of text
-	this.train = function(data) {
+	this.train = function(words, ngram) {
+		var self = this;
+		// for each ngram
+		for (var i = 0; i <= words.length - ngram; i++) {
+			// trace into tree
+			this.traceFullSection(words.slice(i, i + ngram), function(result) {
+				if (result.remainingBranch.length == 0) {
+					result.node.probability++;
+				} else {
+					self.addSection(result.node, result.insertion_index, result.remainingBranch);
+				}
+			});	
+		}
 
 	}
 
