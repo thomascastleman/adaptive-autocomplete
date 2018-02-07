@@ -2,12 +2,13 @@
 var Node = require('./Node.js');
 var Tree = require('./Tree.js');
 
-module.exports = function(socket) {
+module.exports = function(s) {
 
-	socket.on('connection', function(sock) {
+	// on client connection through socket
+	s.on('connection', function(socket) {
 
 		// send all necessary data on connection
-		sock.emit('initial data', {
+		socket.emit('initial data', {
 			node_class: Node.toString(),
 			tree_class: Tree.toString(),
 			tree_data: global.stableTree.serialize(),

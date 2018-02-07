@@ -33,10 +33,3 @@ server.listen(port, function() {
 
 
 // debug ---------------------------------------------------------
-
-var wordTree = new Tree(undefined);
-
-var sentence = "here is some here is some more and here is some even more dater tot";
-wordTree.train(sentence.split(" "), 4);
-
-console.log(wordTree.getSubtreeCompletions(wordTree.root, undefined));
