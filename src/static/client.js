@@ -28,17 +28,6 @@ $(document).ready(function() {
 		// init char tree from tree data
 		charTree = new Tree(undefined);
 		charTree.construct(data.tree_data);
-
-
-		charTree.traceToChild(charTree.root, 'a', function(node) {
-			if (node) {
-				console.log("Child found");
-				console.log(node);
-			} else {
-				console.log("No match found");
-			}
-		});
-
 	});
 
 	// listen for all key presses

@@ -12,7 +12,6 @@ var moment          = require('moment');
 var server          = require('http').createServer(app);
 var socket          = require('socket.io')(server);
 
-
 var listeners		= require('./socket.js')(socket);
 var routes          = require('./routes.js')(app);
 var constants		= require('./constants.js');
@@ -33,15 +32,11 @@ server.listen(port, function() {
 });
 
 
-
 // debug ---------------------------------------------------------
 
 var wordTree = new Tree(undefined);
 
-var sentence = "here is some here is some data for the word tree to use";
-
-wordTree.train(sentence.split(" "), 3);
-
-wordTree.log();
+var sentence = "here is some here is some more and here is some even more dater tot";
+wordTree.train(sentence.split(" "), 4);
 
 console.log(wordTree.getSubtreeCompletions(wordTree.root, undefined));

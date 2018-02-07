@@ -202,9 +202,11 @@ module.exports = function(_treeQuality) {
 		// if completing from word tree
 		if (!fragment) {
 			for (var i = 0; i < node.children.length; i++) {
-				this.pushInOrder(completions, {completion: node.children[i].data, node: node.children[i]});
+				// if terminal node
+				if (node.children[i].probability > 0) {
+					this.pushInOrder(completions, {completion: node.children[i].data, node: node.children[i]});
+				}
 			}
-
 		// if char tree
 		} else {
 			var stack = node.children;
@@ -297,7 +299,7 @@ module.exports = function(_treeQuality) {
 	// train wordtree on corpus of text
 	this.train = function(words, ngram) {
 		var self = this;
-		// for each ngram
+		// for each word
 		for (var i = 0; i <= words.length - ngram; i++) {
 			// trace into tree
 			this.traceFullSection(words.slice(i, i + ngram), function(result) {
@@ -306,9 +308,8 @@ module.exports = function(_treeQuality) {
 				} else {
 					self.addSection(result.node, result.insertion_index, result.remainingBranch);
 				}
-			});	
+			});
 		}
-
 	}
 
 }
