@@ -81,6 +81,7 @@ module.exports = function(_treeQuality) {
 		return strA.charCodeAt(0) < strB.charCodeAt(0);
 	}
 
+	// push a completion object to an array such that probability order is maintained
 	this.pushInOrder = function(array, completionData) {
 		var min = 0;
 		var max = array.length;
@@ -235,7 +236,7 @@ module.exports = function(_treeQuality) {
 
 	// trace word into tree and increment terminal probability, create branch if nonexistent
 	this.increment = function(word) {
-		var self = this;
+		var self = this;	// capture 'this' from tree scope
 
 		this.traceFullSection(word.split(""), function(result) {
 			// if full word found
@@ -257,7 +258,19 @@ module.exports = function(_treeQuality) {
 
 	// trace word into tree and decrement terminal probability
 	this.decrement = function(word) {
-
+		this.traceFullSection(word.split(""), function(result) {
+			// if full word found
+			if (result.remainingBranch.length == 0) {
+				if (result.node.probability > 0) {
+					result.node.probability--;
+					if (result.node.localDelta) {
+						result.node.localDelta--;
+					} else {
+						result.node.localDelta = -1;
+					}
+				}
+			}
+		});
 	}
 
 	// train wordtree on corpus of text

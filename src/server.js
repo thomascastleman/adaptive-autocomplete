@@ -29,7 +29,7 @@ global.unstableTree = new Tree(constants.UNSTABLE);
 global.noveltyTree = new Tree(constants.NOVELTY);
 
 server.listen(port, function() {
-	console.log("Adaptive autocomplete server listening on port %d", port);
+	console.log('Adaptive autocomplete server listening on port %d', port);
 });
 
 
@@ -42,10 +42,9 @@ stableTree.increment("word");
 stableTree.increment("words");
 stableTree.increment("wordsmith");
 stableTree.increment("wombat");
+stableTree.increment("wombat");
+
+stableTree.decrement("wombat");
 
 var completions = stableTree.getSubtreeCompletions(stableTree.root, "");
 console.log(completions);
-
-
-
-// oh shit it's stopping completion search after first terminal node found --- fix this
