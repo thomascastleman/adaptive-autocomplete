@@ -162,6 +162,15 @@ Node {
 
 
 Tree {
+
+
+	// ----------------------------
+
+	TREE SERIALIZATION NEEDS WORK - make it better
+
+	// ---------------------------
+
+
 	
 	int treeType --> denotes CHAR or WORD
 	int treeQuality --> denotes STABLE, UNSTABLE, or NOVELTY
