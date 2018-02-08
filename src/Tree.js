@@ -187,7 +187,7 @@ module.exports = function(_treeQuality) {
 				}
 			});
 			if (result) break;
-		}
+		}	
 
 		if (!result) result = {node: lowest, remainingBranch: []};
 
@@ -200,7 +200,7 @@ module.exports = function(_treeQuality) {
 		var completions = [];
 
 		// if completing from word tree
-		if (!fragment) {
+		if (fragment == undefined) {
 			for (var i = 0; i < node.children.length; i++) {
 				// if terminal node
 				if (node.children[i].probability > 0) {
@@ -209,7 +209,8 @@ module.exports = function(_treeQuality) {
 			}
 		// if char tree
 		} else {
-			var stack = node.children;
+			var stack = [];
+			stack.push.apply(stack, node.children);
 
 			while (stack.length > 0) {
 				var node = stack.pop();
