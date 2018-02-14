@@ -33,18 +33,8 @@ server.listen(port, function() {
 
 
 // debug ---------------------------------------------------------
+
 var words = "test words here they are some common words".split(" ");
 for (var i = 0; i < words.length; i++) {
 	stableTree.increment(words[i]);
 }
-
-stableTree.traceFullSection("common".split(''), function(res) {
-	console.log(res);
-});
-
-var newTree = new Tree(0);
-newTree.construct(stableTree.serialize());
-
-newTree.traceFullSection("common".split(''), function(res) {
-	console.log(res);
-});

@@ -44,10 +44,18 @@ module.exports = function(_treeQuality) {
 
 			// decrease num children left to serialize from this parent
 			currentNumChildren--;
-			if (currentNumChildren == 0) {
-				// move to next parent if out of children
-				currentParentID++;
-				currentNumChildren = numChildren[currentParentID];
+
+			if (currentNumChildren <= 0) {
+				// move to next parent with children if out of children
+				if (q.length > 0) {
+					while (true) {
+						currentParentID++;
+						if (numChildren[currentParentID] > 0) {
+							currentNumChildren = numChildren[currentParentID];
+							break;
+						}
+					}
+				}
 			}
 		}
 
@@ -139,9 +147,6 @@ module.exports = function(_treeQuality) {
 		var min = 0;
 		var max = node.children.length;
 		var halfway, h;
-
-		console.log("Looking for " + data + " among: ");
-		console.log(node.children);
 
 		if (node.children.length > 0) {
 			while (true) {
