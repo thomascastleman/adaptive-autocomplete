@@ -76,6 +76,7 @@ User enters application (or enters room?):
 				reset tabbed
 				offeringCompletions = false
 				ranSearch = false
+				remove char from fragment if > 0
 
 			on ' ':	// completion without alg's help
 				get last word in chat string
