@@ -33,7 +33,18 @@ server.listen(port, function() {
 
 
 // debug ---------------------------------------------------------
-var words = "Of on affixed civilly moments promise explain fertile in. Assurance advantage belonging happiness departure so of. Now improving and one sincerity intention allowance commanded not. Oh an am frankness be necessary earnestly advantage estimable extensive. Five he wife gone ye. Mrs suffering sportsmen earnestly any. In am do giving to afford parish settle easily garret.".split(" ");
+var words = "test words here they are some common words".split(" ");
 for (var i = 0; i < words.length; i++) {
 	stableTree.increment(words[i]);
 }
+
+stableTree.traceFullSection("common".split(''), function(res) {
+	console.log(res);
+});
+
+var newTree = new Tree(0);
+newTree.construct(stableTree.serialize());
+
+newTree.traceFullSection("common".split(''), function(res) {
+	console.log(res);
+});

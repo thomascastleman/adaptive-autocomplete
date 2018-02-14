@@ -140,6 +140,9 @@ module.exports = function(_treeQuality) {
 		var max = node.children.length;
 		var halfway, h;
 
+		console.log("Looking for " + data + " among: ");
+		console.log(node.children);
+
 		if (node.children.length > 0) {
 			while (true) {
 				// calculate halfway index and get node
@@ -148,7 +151,7 @@ module.exports = function(_treeQuality) {
 
 				// if match found
 				if (h.data == data) {
-					result.matchingChild = h;
+					result.node = h;
 					delete result.insertion_index;
 					break;
 				// if halfway node comes before
@@ -178,12 +181,12 @@ module.exports = function(_treeQuality) {
 		for (var i = 0; i < branch.length; i++) {
 			// trace from current lowest to child with matching data
 			this.traceToChild(lowest, branch[i], function(data) {
-				if (!data.matchingChild) {
+				if (!data.node) {
 					// return lowest node found, remaining branch to trace, and where to insert
 					result = {node: lowest, remainingBranch: branch.slice(i, branch.length), insertion_index: data.insertion_index};
 					return;
 				} else {
-					lowest = data.matchingChild;	// move to child node
+					lowest = data.node;	// move to child node
 				}
 			});
 			if (result) break;

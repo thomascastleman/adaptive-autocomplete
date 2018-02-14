@@ -43,9 +43,12 @@ User enters application (or enters room?):
 					offeringCompletions = true
 					reset tabbed to false
 
-					if fragment is empty: 
+					if fragment is empty AND last char is space: 
 						search word tree for completions
 						act like a search didn't happen
+					else if fragment is empty AND last char is NOT space:
+						(we need a fragment)
+						split chat string, get fragment from last index
 
 					else if no completions already exist:
 						completions = run search on current fragment
