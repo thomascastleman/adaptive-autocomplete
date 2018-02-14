@@ -13,9 +13,6 @@ var offeringCompletions;	// (bool) are completions currently being offered (chan
 var ranSearch;				// (bool) was a search attempted at some point throughout typing
 var completions = [];		// (Node[]) set of completions found so far, if exist
 
-// DEBUG
-// var q = [];	// queue of characters yet to be traced async
-
 $(document).ready(function() {
 	var $chatbox = $('#chatbox');
 	$chatbox.val('');	// make sure chat box is clear
@@ -45,6 +42,17 @@ $(document).ready(function() {
 
 		// if key is alphabetic
 		if (event.keyCode <= 90 && event.keyCode >= 65) {
+			// no longer offering completions
+			if (offeringCompletions) offeringCompletions = false;
+
+			// establish fragment if backspaced
+			if (fragment == '') {
+				var chat_string = $chatbox.val();
+				if (chat_string[chat_string.length - 1] != ' ') {
+					chat_string = chat_string.split(" ");
+					fragment = chat_string[chat_string.length - 1];
+				}
+			}
 			fragment += event.key;	// add key to fragment
 
 			if (!tracepoint) {
@@ -52,6 +60,8 @@ $(document).ready(function() {
 				// establish tracepoint
 				charTree.traceFullSection(fragment.split(''), function(res) {
 					if (res.remainingBranch.length == 0) tracepoint = res.node;
+					console.log("Resulting tp: ");
+					console.log(tracepoint);
 				});
 			} else {
 				console.log("Attempting trace from " + tracepoint.data + " to " + event.key);
@@ -62,18 +72,10 @@ $(document).ready(function() {
 					console.log(tracepoint);
 				});
 			}
-
-			// q.push(event.key);
-			// if (q.length == 1) traceQueue();
 		}
 
 		// special key listeners
 		switch (event.keyCode) {
-
-			// on space key
-			case 32:
-				fragment = "";	// clear fragment
-				break;
 
 			// on backspace key
 			case 8:
@@ -81,35 +83,90 @@ $(document).ready(function() {
 				if (fragment.length > 0) {
 					fragment = fragment.slice(0, fragment.length - 1);
 				}
+
+				// clear search data
+				tracepoint = undefined;
+				tabbed = false;
+				offeringCompletions = false;
+				ranSearch = false;
+				completions = [];
 				break;
 
 			// on tab key
 			case 9: 
 				event.preventDefault();	// prevent tab refocusing in browser
+
+				if (!offeringCompletions) {
+					// if we CAN search
+					if (tracepoint) {
+
+						offeringCompletions = true;
+						tabbed = false;
+
+						if (fragment == "") {
+							var chat_string = $chatbox.val();
+							if (chat_string[chat_string.length - 1] == ' ') {
+
+								// SEARCH WORD TREE
+
+								ranSearch = false;
+							} else {
+								// get last string in chat string as fragment
+								var split = chat_string.split(" ");
+								fragment = split[split.length - 1];
+							}
+
+						} else if (completions.length == 0) {
+							completions = charTree.getSubtreeCompletions(tracepoint, fragment);
+							ranSearch = true;
+						} else {
+							var copy = [];
+							// remove all completions no longer possible
+							for (var i = 0; i < completions.length; i++) {
+								var sub = completions[i].completion.slice(0, fragment.length);
+								if (sub == fragment) copy.push(completions[i]);
+							}
+							completions = copy;
+
+							// RESET VISIBILITY
+						}
+
+						for (var i = 0; i < completions.length; i++) {
+							console.log(completions[i].completion);
+						}
+					}
+				} else {
+
+					// SCROLL TO NEXT COMPLETION OPTION
+
+				}
+
 				break;
 
 			// on enter key
 			case 13:
 				break;
+
+			// on space key
+			case 32:
+				if (offeringCompletions) {
+					offeringCompletions = false;
+					// REMOVE COMPLETION DISPLAY
+				}
+
+				fragment = "";	// clear fragment
+				tracepoint = undefined;
+				break;
 		}
 	});
 });
-
-// function traceQueue() {
-// 	console.log("CALL to traceQueue");
-// 	while (q.length > 0) {
-// 		// trace this char
-// 		charTree.traceToChild(tracepoint, q.shift(), function(res) {
-// 			console.log("Traced from '" + tracepoint.data + "' to '" + res.node.data + "'");
-// 			tracepoint = res.node;	// update tracepoint
-// 		});
-// 	}
-// }
-
 
 // DEBUGE
 setInterval( function() {
 	$('#debug').text("");
 	$('#debug').append("Fragment: \'" + fragment + "\'<br>");
+	$('#debug').append("Offering: " + offeringCompletions + "<br>");
+	$('#debug').append("Tabbed: " + tabbed + "<br>");
+	$('#debug').append("Ransearch: \'" + ranSearch + "<br>");
 	if (tracepoint) $('#debug').append("Tracepoint: \'" + tracepoint.data + "\'<br>");
 }, 50);

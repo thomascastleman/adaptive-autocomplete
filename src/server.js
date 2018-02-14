@@ -34,7 +34,7 @@ server.listen(port, function() {
 
 // debug ---------------------------------------------------------
 
-var words = "test words here they are some common words".split(" ");
+var words = "automobile autocomplete autocorrect automatic auto".split(" ");
 for (var i = 0; i < words.length; i++) {
 	stableTree.increment(words[i]);
 }
