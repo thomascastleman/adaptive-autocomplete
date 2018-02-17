@@ -22,3 +22,7 @@ node_modules/
 
 # stupid mac os files
 .DS_Store
+
+
+# ignore dictionary
+lots_of_words.txt

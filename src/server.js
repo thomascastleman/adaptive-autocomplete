@@ -49,6 +49,4 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 	for (var i = 0; i < words.length; i++) {
 		stableTree.increment(words[i]);
 	}
-
-	stableTree.log();
 });

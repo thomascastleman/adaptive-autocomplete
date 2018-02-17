@@ -14,8 +14,12 @@ var ranSearch;				// (bool) was a search attempted at some point throughout typi
 var attemptedTrace;			// (bool) has a trace been attempted on this word
 var completions = [];		// (Node[]) set of completions found so far, if exist
 
+var selectedIndex = 0;		// index of completion the user has selected
+
+var $chatbox;
+
 $(document).ready(function() {
-	var $chatbox = $('#chatbox');
+	$chatbox = $('#chatbox');
 	$chatbox.val('');	// make sure chat box is clear
 
 	socket = io();	// init socket connection
@@ -46,7 +50,7 @@ $(document).ready(function() {
 			// no longer offering completions
 			if (offeringCompletions) {
 				offeringCompletions = false;
-				// REMOVE COMPLETION DISPLAY (abstract this out)
+				hideCompletions();
 			}
 
 			// establish fragment if backspaced
@@ -96,9 +100,10 @@ $(document).ready(function() {
 						// if last char space (beginning of word)
 						if (chat_string[chat_string.length - 1] == ' ') {
 
-							// SEARCH WORD TREE and break I suppose
+							// SEARCH WORD TREE
 
 							ranSearch = false;
+							break;
 						} else {
 							// get last string in chat string as fragment
 							var split = chat_string.split(" ");
@@ -117,11 +122,13 @@ $(document).ready(function() {
 						// if search already run
 						} else {
 							var copy = [];
+							
 							// remove all completions no longer possible
 							for (var i = 0; i < completions.length; i++) {
 								var sub = completions[i].completion.slice(0, fragment.length);
 								if (sub == fragment) copy.push(completions[i]);
 							}
+							console.log("Narrowed from " + completions.length + " to " + copy.length);
 							completions = copy;
 
 							// RESET VISIBILITY
@@ -133,27 +140,36 @@ $(document).ready(function() {
 						}
 					}
 				} else {
-
-					// SCROLL TO NEXT COMPLETION OPTION
-
+					// scroll to next completion
+					selectNextCompletion();
 				}
 
 				break;
 
 			// on enter key
 			case 13:
-				// WRITE THIS
+				if (offeringCompletions) {
+					var selectedCompletion = completions[selectedIndex];
+
+					fillCompletion(selectedCompletion.completion);
+					selectedCompletion.node.probability++;
+					socket.emit('completion accepted', {word: selectedCompletion.completion});
+				} else {
+					// SEND CHAT MESSAGE HERE
+				}
+
+				fragment = "";
+				clearData();
 				break;
 
 			// on space key
 			case 32:
 				if (offeringCompletions) {
 					offeringCompletions = false;
-					// REMOVE COMPLETION DISPLAY
+					hideCompletions();
 				}
 
 				// DO ALL OF THE ANALYTICS HERE (tabbed and search data)
-
 
 				fragment = "";
 				clearData();
@@ -169,6 +185,7 @@ function clearData() {
 	tabbed = false;
 	attemptedTrace = false;
 	completions = [];
+	selectedIndex = 0;
 }
 
 // establish a tracepoint from the current fragment
