@@ -1,4 +1,3 @@
-var constants = require('./constants.js');
 var Node = require('./Node.js');
 
 module.exports = function(_treeQuality) {

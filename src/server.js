@@ -14,13 +14,18 @@ var socket          = require('socket.io')(server);
 
 var listeners		= require('./socket.js')(socket);
 var routes          = require('./routes.js')(app);
-var constants		= require('./constants.js');
 
 var Node			= require('./Node.js');
 var Tree			= require('./Tree.js');
 var Database		= require('./Database.js');
 
 var port = 8080;
+
+global.constants = {
+	STABLE: 0,
+	UNSTABLE: 1,
+	NOVELTY: 2
+};
 
 // init trees
 global.stableTree = new Tree(constants.STABLE);
