@@ -34,7 +34,7 @@ server.listen(port, function() {
 
 // debug ---------------------------------------------------------
 
-var words = "automobile autocomplete autocorrect automatic auto autopilot".split(" ");
+var words = "automobile autocomplete autocorrect automatic auto autopilot armadillo".split(" ");
 for (var i = 0; i < words.length; i++) {
 	stableTree.increment(words[i]);
 }

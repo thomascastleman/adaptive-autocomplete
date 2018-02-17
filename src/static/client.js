@@ -11,6 +11,7 @@ var tracepoint;				// (Node) pointer to lowest node we've traced down in tree
 var tabbed;					// (bool) did user tab over completions in most recent offering?
 var offeringCompletions;	// (bool) are completions currently being offered (changes function of some keys)
 var ranSearch;				// (bool) was a search attempted at some point throughout typing
+var attemptedTrace;			// (bool) has a trace been attempted on this word
 var completions = [];		// (Node[]) set of completions found so far, if exist
 
 $(document).ready(function() {
@@ -43,7 +44,10 @@ $(document).ready(function() {
 		// if key is alphabetic
 		if (event.keyCode <= 90 && event.keyCode >= 65) {
 			// no longer offering completions
-			if (offeringCompletions) offeringCompletions = false;
+			if (offeringCompletions) {
+				offeringCompletions = false;
+				// REMOVE COMPLETION DISPLAY (abstract this out)
+			}
 
 			// establish fragment if backspaced
 			if (fragment == '') {
@@ -55,7 +59,8 @@ $(document).ready(function() {
 
 			// if no tp, establish
 			if (!tracepoint) {
-				establishTracePoint();
+				// if no previous attempt on this word, trace
+				if (!attemptedTrace) establishTracePoint();
 			} else {
 				// trace from tp to child with this char
 				charTree.traceToChild(tracepoint, event.key, function(res) {
@@ -82,6 +87,7 @@ $(document).ready(function() {
 
 				if (!offeringCompletions) {
 					offeringCompletions = true;
+					ranSearch = true;
 
 					// if empty fragment (backspace or new word)
 					if (fragment == '') {
@@ -136,6 +142,7 @@ $(document).ready(function() {
 
 			// on enter key
 			case 13:
+				// WRITE THIS
 				break;
 
 			// on space key
@@ -145,8 +152,11 @@ $(document).ready(function() {
 					// REMOVE COMPLETION DISPLAY
 				}
 
-				fragment = "";	// clear fragment
-				tracepoint = undefined;
+				// DO ALL OF THE ANALYTICS HERE (tabbed and search data)
+
+
+				fragment = "";
+				clearData();
 				break;
 		}
 	});
@@ -157,13 +167,17 @@ function clearData() {
 	offeringCompletions = false;
 	ranSearch = false;
 	tabbed = false;
+	attemptedTrace = false;
 	completions = [];
 }
 
 // establish a tracepoint from the current fragment
 function establishTracePoint() {
+	console.log("establishing tp on fragment '" + fragment + "'");	// debug
+	attemptedTrace = true;
 	charTree.traceFullSection(fragment.split(''), function(res) {
 		if (res.remainingBranch.length == 0) tracepoint = res.node;
+		console.log("TP: " + res.node.data);
 	});
 }
 
@@ -174,5 +188,11 @@ setInterval( function() {
 	$('#debug').append("Offering: " + offeringCompletions + "<br>");
 	$('#debug').append("Tabbed: " + tabbed + "<br>");
 	$('#debug').append("Ransearch: \'" + ranSearch + "<br>");
-	if (tracepoint) $('#debug').append("Tracepoint: \'" + tracepoint.data + "\'<br>");
+	$('#debug').append("Attempted trace: \'" + attemptedTrace + "<br>");
+	
+	if (tracepoint) {
+		$('#debug').append("<br>TP:<br>");
+		$('#debug').append("Data: '" + tracepoint.data + "'<br>");
+		$('#debug').append("Prob: " + tracepoint.probability + "<br>");
+	}
 }, 50);
