@@ -40,6 +40,10 @@ User enters application (or enters room?):
 
 			on '\t' or pause exceeding threshold: (they want completions)
 				if not offeringCompletions:
+
+					if no tracepoint:
+						establish tracepoint (abstract this out)					
+
 					offeringCompletions = true
 					reset tabbed to false
 
@@ -50,7 +54,8 @@ User enters application (or enters room?):
 						(we need a fragment)
 						split chat string, get fragment from last index
 
-					else if no completions already exist:
+					
+					if no completions already exist:
 						completions = run search on current fragment
 						record that search was run (ranSearch)
 					otherwise:

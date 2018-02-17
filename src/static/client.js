@@ -47,27 +47,18 @@ $(document).ready(function() {
 
 			// establish fragment if backspaced
 			if (fragment == '') {
-				var chat_string = $chatbox.val();
-				if (chat_string[chat_string.length - 1] != ' ') {
-					chat_string = chat_string.split(" ");
-					fragment = chat_string[chat_string.length - 1];
-				}
+				fragment = $chatbox.val().split(" ");
+				fragment = fragment[fragment.length - 1];
 			}
+
 			fragment += event.key;	// add key to fragment
 
+			// if no tp, establish
 			if (!tracepoint) {
-				console.log("Establishing tracepoint...");//dbug
-				// establish tracepoint
-				charTree.traceFullSection(fragment.split(''), function(res) {
-					if (res.remainingBranch.length == 0) tracepoint = res.node;
-					console.log("Resulting tp: ");
-					console.log(tracepoint);
-				});
+				establishTracePoint();
 			} else {
-				console.log("Attempting trace from " + tracepoint.data + " to " + event.key);
-				// trace down following this char
+				// trace from tp to child with this char
 				charTree.traceToChild(tracepoint, event.key, function(res) {
-					console.log("Result: " + res.node);
 					tracepoint = res.node;
 					console.log(tracepoint);
 				});
@@ -80,45 +71,44 @@ $(document).ready(function() {
 			// on backspace key
 			case 8:
 				// remove a char from fragment if not empty
-				if (fragment.length > 0) {
-					fragment = fragment.slice(0, fragment.length - 1);
-				}
-
-				// clear search data
-				tracepoint = undefined;
-				tabbed = false;
-				offeringCompletions = false;
-				ranSearch = false;
-				completions = [];
+				if (fragment.length > 0) fragment = fragment.slice(0, fragment.length - 1);
+				clearData();
 				break;
 
 			// on tab key
 			case 9: 
 				event.preventDefault();	// prevent tab refocusing in browser
+				tabbed = true;			// register tab
 
 				if (!offeringCompletions) {
-					// if we CAN search
+					offeringCompletions = true;
+
+					// if empty fragment (backspace or new word)
+					if (fragment == '') {
+						var chat_string = $chatbox.val();
+
+						// if last char space (beginning of word)
+						if (chat_string[chat_string.length - 1] == ' ') {
+
+							// SEARCH WORD TREE and break I suppose
+
+							ranSearch = false;
+						} else {
+							// get last string in chat string as fragment
+							var split = chat_string.split(" ");
+							fragment = split[split.length - 1];
+						}
+					}
+
+					if (!tracepoint) establishTracePoint();
+
+					// if tp successfully found
 					if (tracepoint) {
-
-						offeringCompletions = true;
-						tabbed = false;
-
-						if (fragment == "") {
-							var chat_string = $chatbox.val();
-							if (chat_string[chat_string.length - 1] == ' ') {
-
-								// SEARCH WORD TREE
-
-								ranSearch = false;
-							} else {
-								// get last string in chat string as fragment
-								var split = chat_string.split(" ");
-								fragment = split[split.length - 1];
-							}
-
-						} else if (completions.length == 0) {
+						// if no completions exist, search
+						if (completions.length == 0) {
 							completions = charTree.getSubtreeCompletions(tracepoint, fragment);
 							ranSearch = true;
+						// if search already run
 						} else {
 							var copy = [];
 							// remove all completions no longer possible
@@ -131,6 +121,7 @@ $(document).ready(function() {
 							// RESET VISIBILITY
 						}
 
+						// debug
 						for (var i = 0; i < completions.length; i++) {
 							console.log(completions[i].completion);
 						}
@@ -160,6 +151,21 @@ $(document).ready(function() {
 		}
 	});
 });
+
+function clearData() {
+	tracepoint = undefined;
+	offeringCompletions = false;
+	ranSearch = false;
+	tabbed = false;
+	completions = [];
+}
+
+// establish a tracepoint from the current fragment
+function establishTracePoint() {
+	charTree.traceFullSection(fragment.split(''), function(res) {
+		if (res.remainingBranch.length == 0) tracepoint = res.node;
+	});
+}
 
 // DEBUGE
 setInterval( function() {
