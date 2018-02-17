@@ -177,7 +177,7 @@ function establishTracePoint() {
 	attemptedTrace = true;
 	charTree.traceFullSection(fragment.split(''), function(res) {
 		if (res.remainingBranch.length == 0) tracepoint = res.node;
-		console.log("TP: " + res.node.data);
+		console.log(res.node);
 	});
 }
 

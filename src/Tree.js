@@ -9,13 +9,16 @@ module.exports = function(_treeQuality) {
 		console.log();
 		var stack = [this.root];
 		var total = 0;
+		var numChild = 0;
 		while (stack.length > 0) {
 			var node = stack.pop();
 			total++;
+			numChild += node.children.length;
 			stack.push.apply(stack, node.children);
 			console.log(node);
 		}
 		console.log(total + ' nodes total');
+		console.log(numChild / total);
 	}
 
 	// serialize all nodes and tree structure into json format
