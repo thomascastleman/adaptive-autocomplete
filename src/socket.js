@@ -13,6 +13,11 @@ module.exports = function(s) {
 			tree_class: Tree.toString(),
 			tree_data: global.stableTree.serialize(),
 		});
+
+		// when completion accepted by client
+		socket.on('completion accepted', function(data) {
+			console.log("'" + data.word + "' accepted");
+		});
 	});
 
 }

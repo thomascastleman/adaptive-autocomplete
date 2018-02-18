@@ -15,12 +15,18 @@ var attemptedTrace;			// (bool) has a trace been attempted on this word
 var completions = [];		// (Node[]) set of completions found so far, if exist
 
 var selectedIndex = 0;		// index of completion the user has selected
+var visibleMin;
+var visibleMax;
+
+var DEFAULT_NUM_COMPLETIONS = 4;
 
 var $chatbox;
+var $completions;
 
 $(document).ready(function() {
 	$chatbox = $('#chatbox');
-	$chatbox.val('');	// make sure chat box is clear
+	$chatbox.val('');	// ensure chat box is clear
+	$completions = $('#completions');
 
 	socket = io();	// init socket connection
 
@@ -134,14 +140,24 @@ $(document).ready(function() {
 							// RESET VISIBILITY
 						}
 
+						visibleMin = 0;
+						visibleMax = completions.length >= DEFAULT_NUM_COMPLETIONS ? DEFAULT_NUM_COMPLETIONS : completions.length;
+						renderCompletions();
+
 						// debug
 						for (var i = 0; i < completions.length; i++) {
 							console.log(completions[i].completion);
 						}
 					}
 				} else {
-					// scroll to next completion
-					selectNextCompletion();
+
+					if (selectedIndex < completions.length - 1) {
+						selectNextCompletion();	// scroll to next completion
+					} else {
+						offeringCompletions = false;
+						selectedIndex = 0;
+						hideCompletions();
+					}
 				}
 
 				break;
@@ -151,6 +167,7 @@ $(document).ready(function() {
 				if (offeringCompletions) {
 					var selectedCompletion = completions[selectedIndex];
 
+					hideCompletions();
 					fillCompletion(selectedCompletion.completion);
 					selectedCompletion.node.probability++;
 					socket.emit('completion accepted', {word: selectedCompletion.completion});
@@ -204,8 +221,9 @@ setInterval( function() {
 	$('#debug').append("Fragment: \'" + fragment + "\'<br>");
 	$('#debug').append("Offering: " + offeringCompletions + "<br>");
 	$('#debug').append("Tabbed: " + tabbed + "<br>");
-	$('#debug').append("Ransearch: \'" + ranSearch + "<br>");
-	$('#debug').append("Attempted trace: \'" + attemptedTrace + "<br>");
+	$('#debug').append("Ransearch: " + ranSearch + "<br>");
+	$('#debug').append("Attempted trace: " + attemptedTrace + "<br>");
+	if (completions.length > 0) $('#debug').append("Selected completion: \'" + completions[selectedIndex].completion + "\'<br>");
 	
 	if (tracepoint) {
 		$('#debug').append("<br>TP:<br>");
