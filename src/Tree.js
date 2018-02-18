@@ -287,7 +287,7 @@ module.exports = function(_treeQuality) {
 		this.traceFullSection(word.split(""), function(result) {
 			// if full word found
 			if (result.remainingBranch.length == 0) {
-				self.decrementNode(result.node);
+				if (result.node.probability > 0) result.node.probability--;
 			}
 		});
 	}
