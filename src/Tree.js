@@ -273,37 +273,49 @@ module.exports = function(_treeQuality) {
 		this.traceFullSection(word.split(""), function(result) {
 			// if full word found
 			if (result.remainingBranch.length == 0) {
-				result.node.probability++;
-				if (result.node.localDelta) {
-					result.node.localDelta++;
-				} else {
-					result.node.localDelta = 1
-				}
-
-				// if delta exceeds threshold !!!
-					// ping server here
+				self.incrementNode(result.node);
 			} else {
 				self.addSection(result.node, result.insertion_index, result.remainingBranch);
 			}
 		});
 	}
 
+	// increment single node's probability
+	this.incrementNode = function(node) {
+		node.probability++;
+		if (node.localDelta) {
+			node.localDelta++;
+		} else {
+			node.localDelta = 1
+		}
+
+		// if delta exceeds threshold !!!
+			// ping server here
+
+	}
+
 	// CHAR TREE
 	// trace word into tree and decrement terminal probability
 	this.decrement = function(word) {
+		var self = this;
 		this.traceFullSection(word.split(""), function(result) {
 			// if full word found
 			if (result.remainingBranch.length == 0) {
-				if (result.node.probability > 0) {
-					result.node.probability--;
-					if (result.node.localDelta) {
-						result.node.localDelta--;
-					} else {
-						result.node.localDelta = -1;
-					}
-				}
+				self.decrementNode(result.node);
 			}
 		});
+	}
+
+	// decrement single node's probability
+	this.decrementNode = function(node) {
+		if (node.probability > 0) {
+			node.probability--;
+			if (node.localDelta) {
+				node.localDelta--;
+			} else {
+				node.localDelta = -1;
+			}
+		}
 	}
 
 	// WORD TREE

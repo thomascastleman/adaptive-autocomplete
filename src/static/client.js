@@ -61,8 +61,7 @@ $(document).ready(function() {
 
 			// establish fragment if backspaced
 			if (fragment == '') {
-				fragment = $chatbox.val().split(" ");
-				fragment = fragment[fragment.length - 1];
+				fragment = $chatbox.val().split(" ").pop();
 			}
 
 			fragment += event.key;	// add key to fragment
@@ -165,7 +164,6 @@ $(document).ready(function() {
 			case 13:
 				if (offeringCompletions) {
 					var selectedCompletion = completions[selectedIndex];
-
 					hideCompletions();
 					fillCompletion(selectedCompletion.completion);
 					selectedCompletion.node.probability++;
@@ -185,7 +183,47 @@ $(document).ready(function() {
 					hideCompletions();
 				}
 
-				// DO ALL OF THE ANALYTICS HERE (tabbed and search data)
+				// data analytics
+				if (ranSearch) {
+					var user_completed_word = $chatbox.val().split(" ").pop();
+					var completion_match;
+
+					for (var i = 0; i < completions.length; i++) {
+						if (user_completed_word == completions[i].completion) {
+							completion_match = completions[i];
+							break;
+						}
+					}
+
+					// if no match or not visible
+					if (!completion_match || !completion_match.was_visible) {
+						// word was not visible and user looked for it
+						if (tabbed) {
+							console.log("word was not visible and user looked for it");
+							if (completion_match) {
+								charTree.incrementNode(completion_match.node);
+							} else {
+								charTree.increment(user_completed_word);
+							}
+
+						// word was not visible and user did not look
+						} else {
+							console.log("word was not visible and user did not look");
+							if (completion_match) charTree.decrementNode(completion_match.node);
+						}
+					// visible
+					} else if (completion_match.was_visible) {
+						// word was visible and user looked for it
+						if (tabbed) {
+							console.log("word was visible and user looked for it");
+							console.log("What to do?");
+						// word was visible and user did not look for it
+						} else {
+							console.log("word was visible and user did not look for it");
+							charTree.decrementNode(completion_match.node);
+						}
+					}
+				}
 
 				fragment = "";
 				clearData();
