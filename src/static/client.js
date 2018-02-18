@@ -201,15 +201,18 @@ $(document).ready(function() {
 						if (tabbed) {
 							console.log("word was not visible and user looked for it");
 							if (completion_match) {
-								charTree.incrementNode(completion_match.node);
+								incrementNode(completion_match.node);
 							} else {
+								// add new branch since not in tree
 								charTree.increment(user_completed_word);
 							}
 
 						// word was not visible and user did not look
 						} else {
 							console.log("word was not visible and user did not look");
-							if (completion_match) charTree.decrementNode(completion_match.node);
+							if (completion_match) {
+								decrementNode(completion_match.node);
+							}
 						}
 					// visible
 					} else if (completion_match.was_visible) {
@@ -217,10 +220,11 @@ $(document).ready(function() {
 						if (tabbed) {
 							console.log("word was visible and user looked for it");
 							console.log("What to do?");
+
 						// word was visible and user did not look for it
 						} else {
 							console.log("word was visible and user did not look for it");
-							charTree.decrementNode(completion_match.node);
+							decrementNode(completion_match.node);
 						}
 					}
 				}
@@ -250,6 +254,33 @@ function establishTracePoint() {
 		if (res.remainingBranch.length == 0) tracepoint = res.node;
 		console.log(res.node);
 	});
+}
+
+function incrementNode(node) {
+	node.probability++;
+	if (node.localDelta) {
+		node.localDelta++;
+	} else {
+		node.localDelta = 1
+	}
+
+	// if delta exceeds threshold !!!
+		// ping server here
+}
+
+// decrement single node's probability
+function decrementNode(node) {
+	if (node.probability > 0) {
+		node.probability--;
+		if (node.localDelta) {
+			node.localDelta--;
+		} else {
+			node.localDelta = -1;
+		}
+
+		// if delta exceeds threshold
+			// ping server
+	}
 }
 
 // DEBUGE

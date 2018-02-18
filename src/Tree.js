@@ -273,25 +273,11 @@ module.exports = function(_treeQuality) {
 		this.traceFullSection(word.split(""), function(result) {
 			// if full word found
 			if (result.remainingBranch.length == 0) {
-				self.incrementNode(result.node);
+				result.node.probability++;
 			} else {
 				self.addSection(result.node, result.insertion_index, result.remainingBranch);
 			}
 		});
-	}
-
-	// increment single node's probability
-	this.incrementNode = function(node) {
-		node.probability++;
-		if (node.localDelta) {
-			node.localDelta++;
-		} else {
-			node.localDelta = 1
-		}
-
-		// if delta exceeds threshold !!!
-			// ping server here
-
 	}
 
 	// CHAR TREE
@@ -304,18 +290,6 @@ module.exports = function(_treeQuality) {
 				self.decrementNode(result.node);
 			}
 		});
-	}
-
-	// decrement single node's probability
-	this.decrementNode = function(node) {
-		if (node.probability > 0) {
-			node.probability--;
-			if (node.localDelta) {
-				node.localDelta--;
-			} else {
-				node.localDelta = -1;
-			}
-		}
 	}
 
 	// WORD TREE
