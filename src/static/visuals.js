@@ -4,6 +4,7 @@ function renderCompletions() {
 	var html;
 	$completions.text('');
 	for (var i = visibleMin; i < visibleMax; i++) {
+		completions[i].was_visible = true;	// record that completion was visibly offered
 		if (i == selectedIndex) {
 			html = '<span style=\"background-color: gray\">' + completions[i].completion + '</span><br>';
 		} else {

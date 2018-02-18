@@ -106,7 +106,7 @@ $(document).ready(function() {
 						// if last char space (beginning of word)
 						if (chat_string[chat_string.length - 1] == ' ') {
 
-							// SEARCH WORD TREE
+							// SEARCH WORD TREE ------------------------------------------
 
 							ranSearch = false;
 							break;
@@ -131,13 +131,12 @@ $(document).ready(function() {
 							
 							// remove all completions no longer possible
 							for (var i = 0; i < completions.length; i++) {
+								delete completions[i].was_visible;	// reset visibility
 								var sub = completions[i].completion.slice(0, fragment.length);
 								if (sub == fragment) copy.push(completions[i]);
 							}
 							console.log("Narrowed from " + completions.length + " to " + copy.length);
 							completions = copy;
-
-							// RESET VISIBILITY
 						}
 
 						visibleMin = 0;
