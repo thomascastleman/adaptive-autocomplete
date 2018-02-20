@@ -11,7 +11,7 @@ module.exports = function(s) {
 		socket.emit('initial data', {
 			node_class: Node.toString(),
 			tree_class: Tree.toString(),
-			tree_data: global.stableTree.serialize(),
+			tree_data: global.stableSerialization
 		});
 
 		// when completion accepted by client
