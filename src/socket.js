@@ -1,6 +1,6 @@
 
-var Node = require('./Node.js');
-var Tree = require('./Tree.js');
+var nodeClass = require('./Node.js').toString();
+var treeClass = require('./Tree.js').toString();
 
 module.exports = function(s) {
 
@@ -9,14 +9,14 @@ module.exports = function(s) {
 
 		// send all necessary data on connection
 		socket.emit('initial data', {
-			node_class: Node.toString(),
-			tree_class: Tree.toString(),
+			node_class: nodeClass,
+			tree_class: treeClass,
 			tree_data: global.stableSerialization
 		});
 
-		// when completion accepted by client
-		socket.on('completion accepted', function(data) {
-			console.log("'" + data.word + "' accepted");
+		// on client tree modification
+		socket.on('modification', function(data) {
+			console.log("'" + data.word + "' modified by " + data.delta);
 		});
 	});
 

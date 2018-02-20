@@ -8,12 +8,9 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.engine('html', mustacheExpress());
 app.use('/', express.static('static'));
 
-var moment          = require('moment');
 var server          = require('http').createServer(app);
 var socket          = require('socket.io')(server);
-
-var fs = require('fs');	// for temp debug tree data
-
+var fs 				= require('fs');	// for temp debug tree data
 var listeners		= require('./socket.js')(socket);
 var routes          = require('./routes.js')(app);
 var Node			= require('./Node.js');
