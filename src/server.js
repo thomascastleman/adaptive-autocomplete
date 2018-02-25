@@ -40,3 +40,6 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 
 	global.stableSerialization = stableTree.serialize();
 });
+
+
+console.log(database.connection);
