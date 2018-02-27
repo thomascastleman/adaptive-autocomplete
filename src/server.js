@@ -8,7 +8,6 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.engine('html', mustacheExpress());
 app.use('/', express.static('static'));
 
-var moment          = require('moment');
 var server          = require('http').createServer(app);
 var socket          = require('socket.io')(server);
 
@@ -28,7 +27,6 @@ global.stableSerialization = "";
 server.listen(port, function() {
 	console.log('Adaptive autocomplete server listening on port %d', port);
 });
-
 
 // debug ---------------------------------------------------------
 
