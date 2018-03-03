@@ -10,9 +10,7 @@ app.use('/', express.static('static'));
 
 var server          = require('http').createServer(app);
 var socket          = require('socket.io')(server);
-
-var fs = require('fs');	// for temp debug tree data
-
+var fs 				= require('fs');	// for temp debug tree data
 var listeners		= require('./socket.js')(socket);
 var routes          = require('./routes.js')(app);
 var Node			= require('./Node.js');
@@ -41,3 +39,6 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 
 	global.stableSerialization = stableTree.serialize();
 });
+
+
+console.log(database.connection);
