@@ -16,6 +16,7 @@ var routes          = require('./routes.js')(app);
 var Node			= require('./Node.js');
 var Tree			= require('./Tree.js');
 var database		= require('./database.js');
+var util			= require('./utilities.js');
 
 var port = 8080;
 
@@ -37,8 +38,5 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 		stableTree.increment(words[i]);
 	}
 
-	global.stableSerialization = stableTree.serialize();
+	global.stableSerialization = util.serializeToString(global.stableTree);
 });
-
-
-console.log(database.connection);
