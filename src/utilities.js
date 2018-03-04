@@ -1,3 +1,4 @@
+var Node = require('./Node.js');
 var database = require('./database.js');
 var con = database.connection;
 
@@ -81,8 +82,27 @@ module.exports = function() {
 	},
 
 	// construct tree from stable_tree table
-	this.constructFromDatabase = function(tree) {
+	this.constructFromDatabase = function(tree, callback) {
+		// pull tree data from db
+		con.query('SELECT * FROM stable_tree;', function(err, result) {
+			// ensure serialization is not corrupted
+			if (result.length % 3 != 0) {
+				console.log("UNABLE TO CONSTRUCT: ERR IN SERIALIZATION");
+			} else {
+				var idToNode = new Array();	// temp link ids to node objects
+				idToNode[0] = tree.root;
 
+				// iterate through data in triplets (data, probability, parent id)
+				for (var i = 0; i < result.length; i++) {
+					var n = new Node(result[i].data, parseFloat(result[i].probability));
+					var parent = idToNode[result[i].uid_parent];	// get parent
+					idToNode[result[i].uid] = n;
+					parent.children.push(n);
+				}
+
+				callback();
+			}
+		});
 	}
 
 }

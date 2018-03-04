@@ -4,6 +4,7 @@ module.exports = function() {
 
 	this.root = new Node(undefined, undefined);
 
+	// debug
 	this.log = function() {
 		console.log();
 		var stack = [this.root];
