@@ -18,7 +18,8 @@ CREATE TABLE swap_tree LIKE stable_tree;
 -- modifications table
 CREATE TABLE modifications (
 	word VARCHAR(32),
-	delta INT
+	delta INT,
+	PRIMARY KEY (word)
 );
 
 -- new words
