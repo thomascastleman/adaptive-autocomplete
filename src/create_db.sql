@@ -12,8 +12,8 @@ CREATE TABLE stable_tree (
 	PRIMARY KEY (uid)
 );
 
--- debug
-INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (1, 'v', 2.4, 0);
+-- temporary table for safe updating of tree serialization
+CREATE TABLE swap_tree LIKE stable_tree;
 
 -- modifications table
 CREATE TABLE modifications (
@@ -21,14 +21,16 @@ CREATE TABLE modifications (
 	delta INT
 );
 
--- debug
-INSERT INTO modifications (word, delta) VALUES ("testword", -2);
-
-
+-- new words
 CREATE TABLE novelty (
 	word VARCHAR(32),
 	user_frequency INT
 );
 
+
+
+
 -- debug
-INSERT INTO novelty (word, user_frequency) VALUES ("word", 50);
+INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (1, 'v', 2.4, 0);
+INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (2, 'b', 5.3, 0);
+INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (3, 'n', 2.1, 1);

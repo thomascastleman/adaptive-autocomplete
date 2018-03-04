@@ -17,6 +17,7 @@ var Node			= require('./Node.js');
 var Tree			= require('./Tree.js');
 var database		= require('./database.js');
 var util			= require('./utilities.js');
+util = new util();
 
 var port = 8080;
 
@@ -39,4 +40,7 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 	}
 
 	global.stableSerialization = util.serializeToString(global.stableTree);
+
+	util.serializeToDatabase(global.stableSerialization);
+
 });

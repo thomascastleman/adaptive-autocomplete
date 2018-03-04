@@ -1,8 +1,11 @@
+var database = require('./database.js');
+var con = database.connection;
 
 // utility functions / tools
-module.exports = {
+module.exports = function() {
 
-	serializeToString: function(tree) {
+	// write tree data to string
+	this.serializeToString = function(tree) {
 
 		var serialization = "";
 		var numChildren = new Array();	// map of node id to number of children
@@ -18,10 +21,7 @@ module.exports = {
 			currentNode = q.shift();								// pop from queue
 			q.push.apply(q, currentNode.children);					// add children to q
 			numChildren[currentID] = currentNode.children.length;	// get number of children off this id
-
-			// make modified copy
-			var copy = Object.assign({id: currentID++, parentID: currentParentID}, currentNode);
-			delete copy.children;
+			currentID++;
 
 			// add to serialization string
 			serialization += currentNode.data + ' ' + currentNode.probability + ' ' + currentParentID + ' ';
@@ -45,6 +45,42 @@ module.exports = {
 
 		// cut off last trailing space char
 		return serialization.substring(0, serialization.length - 1);
+	}
+
+	// write tree safely into stable_tree table
+	this.serializeToDatabase = function(serialization) {
+		var data = serialization.split(' ');
+
+		// ensure serialization is not corrupted
+		if (data.length % 3 != 0) {
+			console.log("ERR IN SERIALIZATION (utilities.js: serialize to db)");
+		} else {
+
+			this.insertAllToSwap(data, function() {
+				con.query('SELECT * FROM swap_tree;', function(err, res) {
+					if (err) throw err;
+					console.log(res);
+					console.log("FINISHED getting from swap");
+				});
+			});
+
+		}
+	}
+
+	this.insertAllToSwap = function(data, callback) {
+		// iterate through data in triplets (data, probability, parent id)
+		var id = 1;
+		for (var i = 0; i < data.length; i += 3) {
+			console.log(data.slice(i, i + 3));
+			con.query('INSERT INTO swap_tree (data, probability, uid_parent) VALUES (?, ?, ?);', [data[i], data[i + 1], data[i + 2]], function(err, result) {
+				if (err) throw err;
+			});
+		}
+		callback();
+	},
+
+	// construct tree from stable_tree table
+	this.constructFromDatabase = function(tree) {
 
 	}
 

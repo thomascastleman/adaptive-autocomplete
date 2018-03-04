@@ -20,49 +20,6 @@ module.exports = function() {
 		console.log(numChild / total);
 	}
 
-	// serialize all nodes and tree structure into json format
-	// this.serialize = function() {
-
-	// 	var allNodes = []; 				// every node in tree
-	// 	var numChildren = new Array();	// map of node id to number of children
-	// 	var currentNode;				// current node being serialized
-	// 	var currentID = 1;				// id of node
-	// 	var currentParentID = 0;		// id of parent
-	// 	var currentNumChildren = this.root.children.length;	// num children remaining to be serialized of this parent
-	// 	var q = [];
-	// 	q.push.apply(q, this.root.children);	// start with children of root
-
-	// 	// while still nodes left to serialize
-	// 	while (q.length > 0) {
-	// 		currentNode = q.shift();								// pop from queue
-	// 		q.push.apply(q, currentNode.children);					// add children to q
-	// 		numChildren[currentID] = currentNode.children.length;	// get number of children off this id
-
-	// 		// make modified copy
-	// 		var copy = Object.assign({id: currentID++, parentID: currentParentID}, currentNode);
-	// 		delete copy.children;
-	// 		allNodes.push(copy);
-
-	// 		// decrease num children left to serialize from this parent
-	// 		currentNumChildren--;
-
-	// 		if (currentNumChildren <= 0) {
-	// 			// move to next parent with children if out of children
-	// 			if (q.length > 0) {
-	// 				while (true) {
-	// 					currentParentID++;
-	// 					if (numChildren[currentParentID] > 0) {
-	// 						currentNumChildren = numChildren[currentParentID];
-	// 						break;
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	}
-
-	// 	return JSON.stringify(allNodes);
-	// }
-
 	// construct full tree from json serialization
 	this.construct = function(serialization) {
 		var data = serialization.split(' ');
