@@ -118,7 +118,9 @@ module.exports = function() {
 
 			var alpha = self.calculateAlpha(deltas);
 
-			
+			for (var i = 0; i < modifiedNodes.length; i++) {
+				console.log("Delta P: " + modifiedNodes[i].delta + "; Delta K: " + self.delta_k(modifiedNodes[i].delta, alpha));
+			}
 		});
 	}
 
@@ -128,22 +130,31 @@ module.exports = function() {
 		var deltas = [];
 		var novelty = [];
 
+		// get all modification data
 		con.query('SELECT * FROM modifications;', function(err, result) {
+			// // clear mod table
+			// con.query('DELETE FROM modifications;', function(err, res) {
+			// 	if (err) throw err;
+			// });
+
 			for (var i = 0; i < result.length; i++) {
-				global.stableTree.traceFullSection(result[i].word.split(''), function(search_res) {
-					if (search_res.remainingBranch.length == 0) {
-						nodes.push({node: search_res.node, delta: result[i].delta});
-						deltas.push(result[i].delta);
-					} else {
-						// insert into novelty
-						novelty.push([result[i].word, result[i].delta]);
-					}
-				});
+				if (Math.abs(result[i].delta) > 0) {
+					global.stableTree.traceFullSection(result[i].word.split(''), function(search_res) {
+						// if search completed
+						if (search_res.remainingBranch.length == 0) {
+							nodes.push({node: search_res.node, delta: result[i].delta});	// keep track of node pointer with delta
+							deltas.push(Math.abs(result[i].delta));	// add delta abs value for alpha calculation later
+						} else {
+							// insert into novelty
+							novelty.push([result[i].word, result[i].delta]);
+						}
+					});
+				}
 			}
 
 			if (novelty.length > 0) {
 				// batch insert all novelty entries
-				con.query('INSERT INTO novelty (word, user_frequency) VALUES ?', [novelty], function(err, result) {
+				con.query('INSERT INTO novelty (word, user_frequency) VALUES ?;', [novelty], function(err, result) {
 					if (err) throw err;
 					console.log("Inserted all into novelty");
 				});
@@ -180,6 +191,15 @@ module.exports = function() {
 			return dataset[ind];
 		} else {
 			return (dataset[ind] + dataset[ind - 1]) / 2.0;
+		}
+	}
+
+	// calculate the "applied" delta based on initial delta
+	this.delta_k = function(delta_p, alpha) {
+		if (delta_p <= alpha) {
+			return delta_p;
+		} else {
+			return alpha * Math.exp(Math.pow(delta_p - alpha, 2) / (-2.0 * alpha));
 		}
 	}
 

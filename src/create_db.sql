@@ -27,3 +27,11 @@ CREATE TABLE novelty (
 	word VARCHAR(32),
 	user_frequency INT
 );
+
+
+
+
+-- debug !!
+
+INSERT INTO modifications (word, delta)
+VALUES ('test', 4), ('another', 3), ('this', 4), ('but', 10), ('and', 73), ('constant', 2), ('constantly', 12), ('discuss', 5), ('everyone', 15), ('everything', 13);
