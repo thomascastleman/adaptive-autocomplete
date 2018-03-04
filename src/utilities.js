@@ -49,7 +49,7 @@ module.exports = function() {
 	}
 
 	// write tree safely into stable_tree table, given serialization string
-	this.serializeToDatabase = function(serialization) {
+	this.serializeToDatabase = function(serialization, callback) {
 		var data = serialization.split(' ');
 
 		// ensure serialization is not corrupted
@@ -74,6 +74,7 @@ module.exports = function() {
 						// reset swap table for later use
 						con.query('DELETE FROM swap_tree;', function(err, result) {
 							if (err) throw err;
+							callback();
 						});
 					});
 				});
@@ -106,7 +107,7 @@ module.exports = function() {
 	}
 
 	// apply filtered modifications to stable tree and update all serializations
-	this.applyFilter = function() {
+	this.applyFilter = function(callback) {
 		var modifiedNodes;
 		var deltas;
 		var self = this;
@@ -116,9 +117,9 @@ module.exports = function() {
 			modifiedNodes = result.nodes;
 			deltas = result.deltas;
 
-			var alpha = self.calculateAlpha(deltas);
-			// var min = Number.POSITIVE_INFINITY;
+			var alpha = self.calculateAlpha(deltas);	// calculate outlier threshold
 
+			// apply all modifications
 			for (var i = 0; i < modifiedNodes.length; i++) {
 				var mod = modifiedNodes[i];
 
@@ -128,25 +129,20 @@ module.exports = function() {
 
 				// update probability (if negative, make 0)
 				mod.node.probability = self.relu(mod.node.probability + delta_k);
-
-				// // maintain minimum for later
-				// if (mod.node.probability > 0 && mod.node.probability < min) {
-				// 	min = mod.node.probability;
-				// }
 			}
-
-			//debug 
-			console.log("alpha = " + alpha);
-
-			console.log(modifiedNodes);
 
 			// prune and recenter
 			self.pruneAndRecenter(self.searchForMin());
 
+			// DEBUG!!!!! since we haven't figured out novelty yet
+			callback();
+
 			// // add new entries
 			// self.applyNovelty(function() {
 			// 	global.stableSerialization = self.serializeToString(global.stableTree);
-			// 	self.serializeToDatabase(global.stableSerialization);
+			// 	self.serializeToDatabase(global.stableSerialization, function() {
+			// 		callback();
+			// 	});
 			// });
 		});
 	}
@@ -159,6 +155,7 @@ module.exports = function() {
 
 		// get all modification data
 		con.query('SELECT * FROM modifications;', function(err, result) {
+			// // debug: need to uncomment this!
 			// // clear mod table
 			// con.query('DELETE FROM modifications;', function(err, res) {
 			// 	if (err) throw err;
@@ -171,8 +168,8 @@ module.exports = function() {
 						if (search_res.remainingBranch.length == 0) {
 							nodes.push({node: search_res.node, delta: result[i].delta});	// keep track of node pointer with delta
 							deltas.push(Math.abs(result[i].delta));	// add delta abs value for alpha calculation later
-						} else {
-							// insert into novelty
+						} else if (result[i].delta > 0) {
+							// insert into novelty (if pos delta)
 							novelty.push([result[i].word, result[i].delta]);
 						}
 					});
@@ -183,7 +180,7 @@ module.exports = function() {
 				// batch insert all novelty entries
 				con.query('INSERT INTO novelty (word, user_frequency) VALUES ?;', [novelty], function(err, result) {
 					if (err) throw err;
-					console.log("Inserted all into novelty");
+					console.log("Inserted " + novelty.length + " entries into novelty");
 				});
 			}
 
@@ -236,10 +233,6 @@ module.exports = function() {
 
 	// recenter and prune all <= 0 branches
 	this.pruneAndRecenter = function(min_prob) {
-
-		// debug
-		console.log("Attempting to prune with min prob " + min_prob);
-
 		var path = [];
 		var current = global.stableTree.root;
 		var next;
@@ -255,7 +248,6 @@ module.exports = function() {
 
 			// recenter when first encountering a terminal node
 			if (current.child_index == 0 && (current.probability > 0 || current.children.length == 0)) {
-				console.log("Recentering '" + current.data + "' from " + current.probability + " to " + (current.probability - min_prob));
 				current.probability -= min_prob;	// recenter probability
 			}
 
@@ -281,6 +273,7 @@ module.exports = function() {
 							break;
 						}
 					}
+
 					// remove child (and thus, dead branch)
 					current.children.splice(current.child_index, 1);
 					current.child_index--;
@@ -293,10 +286,8 @@ module.exports = function() {
 				break;
 			}
 		}
-
-		console.log("Finished pruning.");
-		global.stableTree.log();
-
+		// debug
+		console.log("Finished pruning / recentering");
 	}
 
 	// determine minimum probability of stable tree

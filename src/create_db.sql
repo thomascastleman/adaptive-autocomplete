@@ -31,10 +31,10 @@ CREATE TABLE novelty (
 
 
 
--- -- debug !!
+-- -- -- debug !!
 
-INSERT INTO modifications (word, delta)
-VALUES ('at', 1), ('ion', 2);
+-- INSERT INTO modifications (word, delta)
+-- VALUES ('at', 1), ('ion', 2);
 
 -- INSERT INTO modifications (word, delta)
 -- VALUES ('test', 4), ('another', 3), ('this', 4), ('but', 10), ('and', 73), ('constant', 0), ('constantly', 12), ('discuss', 5), ('everyone', 15), ('everything', 13), ('discussion', 3);
