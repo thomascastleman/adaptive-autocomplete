@@ -45,4 +45,7 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 	}
 
 	global.stableSerialization = util.serializeToString(global.stableTree);
+
+
+	util.applyFilter();
 });

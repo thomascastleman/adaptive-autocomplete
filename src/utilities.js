@@ -79,7 +79,7 @@ module.exports = function() {
 				});
 			});
 		}
-	},
+	}
 
 	// construct tree from stable_tree table
 	this.constructFromDatabase = function(tree, callback) {
@@ -103,6 +103,84 @@ module.exports = function() {
 				callback();
 			}
 		});
+	}
+
+	// apply filtered modifications to stable tree and update all serializations
+	this.applyFilter = function() {
+		var modifiedNodes;
+		var deltas;
+		var self = this;
+
+		// search modifications into tree
+		this.getNodePointers(function(result) {
+			modifiedNodes = result.nodes;
+			deltas = result.deltas;
+
+			var alpha = self.calculateAlpha(deltas);
+
+			
+		});
+	}
+
+	// search modification entries and return pointers to actual nodes in stable tree
+	this.getNodePointers = function(callback) {
+		var nodes = [];
+		var deltas = [];
+		var novelty = [];
+
+		con.query('SELECT * FROM modifications;', function(err, result) {
+			for (var i = 0; i < result.length; i++) {
+				global.stableTree.traceFullSection(result[i].word.split(''), function(search_res) {
+					if (search_res.remainingBranch.length == 0) {
+						nodes.push({node: search_res.node, delta: result[i].delta});
+						deltas.push(result[i].delta);
+					} else {
+						// insert into novelty
+						novelty.push([result[i].word, result[i].delta]);
+					}
+				});
+			}
+
+			if (novelty.length > 0) {
+				// batch insert all novelty entries
+				con.query('INSERT INTO novelty (word, user_frequency) VALUES ?', [novelty], function(err, result) {
+					if (err) throw err;
+					console.log("Inserted all into novelty");
+				});
+			}
+
+			callback({nodes: nodes, deltas: deltas});
+		});
+	}
+
+	// calculate the outlier threshold, alpha, of a given data set
+	this.calculateAlpha = function(deltas) {
+		deltas.sort(function(a, b){ return a - b });
+		var ind = Math.floor(deltas.length / 2);
+		var q1, q3;
+
+		// calculate quartiles
+		if (deltas.length % 2 == 0) {
+			q1 = this.median(deltas.slice(0, ind));
+			q3 = this.median(deltas.slice(ind, deltas.length));
+		} else {
+			q1 = this.median(deltas.slice(0, ind));
+			q3 = this.median(deltas.slice(ind + 1, deltas.length));
+		}
+
+		return q3 + (1.5 * (q3 - q1));
+	}
+
+	// get the median of a dataset
+	this.median = function(dataset) {
+		dataset.sort(function(a, b){ return a - b });
+		var ind = Math.floor(dataset.length / 2);
+
+		if (dataset.length % 2 != 0) {
+			return dataset[ind];
+		} else {
+			return (dataset[ind] + dataset[ind - 1]) / 2.0;
+		}
 	}
 
 }
