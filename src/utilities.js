@@ -55,44 +55,37 @@ module.exports = function() {
 		if (data.length % 3 != 0) {
 			console.log("ERR IN SERIALIZATION (utilities.js: serialize to db)");
 		} else {
-			// serialize into swap, so as not to risk losing data in stable_tree
-			this.insertAllToSwap(data, function() {
-				// con.query('SELECT * FROM swap_tree;', function(err, res) {
-				// 	if (err) throw err;
-				// 	console.log(res);
-				// 	console.log("FINISHED getting from swap");
-				// });
-				console.log("Finished inserting records into swap table.");
+			var values = [];
+			// iterate through data in triplets (data, probability, parent id)
+			for (var i = 0; i < data.length; i += 3) {
+				values.push([data[i], parseFloat(data[i + 1]), parseInt(data[i + 2])]);
+			}
 
-				// // remove all previous records of stable tree
-				// con.query('DELETE * FROM stable_tree;', function(err, result) {
-				// 	if (err) throw err;
-
-				// 	// migrate tree data into actual table
-				// 	con.query('SELECT * INTO stable_tree FROM swap_tree;', function(err, result) {
-				// 		if (err) throw err;
-
-				// 		// reset swap table for later use
-				// 		con.query('DELETE * FROM swap_tree;', function(err, result) {
-				// 			if (err) throw err;
-				// 		});
-				// 	});
-				// });
-			});
-		}
-	}
-
-	this.insertAllToSwap = function(data, callback) {
-		// iterate through data in triplets (data, probability, parent id)
-		var node = 1;
-		for (var i = 0; i < data.length; i += 3) {
-			con.query('INSERT INTO swap_tree (data, probability, uid_parent) VALUES (?, ?, ?);', [data[i], data[i + 1], data[i + 2]], function(err, result) {
+			con.query('INSERT INTO swap_tree (data, probability, uid_parent) VALUES ?;', [values], function(err, result) {
 				if (err) throw err;
 
-				if (node == data.length / 3) {
-					callback();
-				}
-				node++;
+				console.log("Finished inserting to swap.");
+
+				// remove all previous records of stable tree
+				con.query('DELETE FROM stable_tree;', function(err, result) {
+					if (err) throw err;
+
+					console.log("Finished deleting stable.");
+
+					// migrate tree data into actual table
+					con.query('SELECT * INTO stable_tree FROM swap_tree;', function(err, result) {
+						if (err) throw err;
+
+						console.log("Finished copying from swap.");
+
+						// reset swap table for later use
+						con.query('DELETE * FROM swap_tree;', function(err, result) {
+							if (err) throw err;
+
+							console.log("Finished clearing swap.");
+						});
+					});
+				});
 			});
 		}
 	},
