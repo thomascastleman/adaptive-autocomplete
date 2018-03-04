@@ -30,7 +30,7 @@ CREATE TABLE novelty (
 
 
 
--- debug
-INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (1, 'v', 2.4, 0);
-INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (2, 'b', 5.3, 0);
-INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (3, 'n', 2.1, 1);
+-- -- debug
+-- INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (1, 'v', 2.4, 0);
+-- INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (2, 'b', 5.3, 0);
+-- INSERT INTO stable_tree (uid, data, probability, uid_parent) VALUES (3, 'n', 2.1, 1);
