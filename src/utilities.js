@@ -117,10 +117,31 @@ module.exports = function() {
 			deltas = result.deltas;
 
 			var alpha = self.calculateAlpha(deltas);
+			var min = Number.POSITIVE_INFINITY;
 
 			for (var i = 0; i < modifiedNodes.length; i++) {
-				console.log("Delta P: " + modifiedNodes[i].delta + "; Delta K: " + self.delta_k(modifiedNodes[i].delta, alpha));
+				var mod = modifiedNodes[i];
+
+				// calculate applied change to make
+				var delta_k = self.delta_k(Math.abs(mod.delta), alpha);
+				if (mod.delta < 0) delta_k *= -1;
+
+				mod.node.probability += delta_k;	// update probability
+
+				// maintain minimum for later
+				if (mod.node.probability > 0 && mod.node.probability < min) {
+					min = mod.node.probability;
+				}
 			}
+
+			// prune and recenter
+			this.pruneAndRecenter(min);
+
+			// add new entries
+			this.applyNovelty(function() {
+				global.stableSerialization = self.serializeToString(global.stableTree);
+				self.serializeToDatabase(global.stableSerialization);
+			});
 		});
 	}
 
@@ -201,6 +222,16 @@ module.exports = function() {
 		} else {
 			return alpha * Math.exp(Math.pow(delta_p - alpha, 2) / (-2.0 * alpha));
 		}
+	}
+
+	// recenter and prune all <= 0 branches
+	this.pruneAndRecenter = function(min_prob) {
+
+	}
+
+	// add trusted novelty entries into stable tree
+	this.applyNovelty = function(callback) {
+
 	}
 
 }
