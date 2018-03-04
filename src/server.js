@@ -35,17 +35,44 @@ server.listen(port, function() {
 // 	global.stableSerialization = util.serializeToString(global.stableTree);
 // });
 
-// read words from dictionary into tree
-fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
-	if (err) throw err;
+// // read words from dictionary into tree
+// fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
+// 	if (err) throw err;
 
-	var words = data.split(" ");
-	for (var i = 0; i < words.length; i++) {
-		stableTree.increment(words[i]);
-	}
+// 	var words = data.split(" ");
+// 	for (var i = 0; i < words.length; i++) {
+// 		stableTree.increment(words[i]);
+// 	}
 
-	global.stableSerialization = util.serializeToString(global.stableTree);
+// 	global.stableSerialization = util.serializeToString(global.stableTree);
 
 
-	util.applyFilter();
-});
+// 	util.applyFilter();
+// });
+
+// at: 3
+global.stableTree.increment('at');
+global.stableTree.increment('at');
+global.stableTree.increment('at');
+
+// an: 0
+global.stableTree.increment('an');
+global.stableTree.decrement('an');
+
+global.stableTree.increment('iola');
+global.stableTree.decrement('iola');
+
+global.stableTree.increment('iol');
+global.stableTree.increment('iol');
+
+global.stableTree.increment('ion');
+
+global.stableTree.increment('it');
+global.stableTree.increment('it');
+global.stableTree.increment('it');
+global.stableTree.increment('it');
+global.stableTree.increment('it');
+global.stableTree.increment('it');
+
+
+util.applyFilter();

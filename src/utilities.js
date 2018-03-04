@@ -117,7 +117,7 @@ module.exports = function() {
 			deltas = result.deltas;
 
 			var alpha = self.calculateAlpha(deltas);
-			var min = Number.POSITIVE_INFINITY;
+			// var min = Number.POSITIVE_INFINITY;
 
 			for (var i = 0; i < modifiedNodes.length; i++) {
 				var mod = modifiedNodes[i];
@@ -126,22 +126,28 @@ module.exports = function() {
 				var delta_k = self.delta_k(Math.abs(mod.delta), alpha);
 				if (mod.delta < 0) delta_k *= -1;
 
-				mod.node.probability += delta_k;	// update probability
+				// update probability (if negative, make 0)
+				mod.node.probability = self.relu(mod.node.probability + delta_k);
 
-				// maintain minimum for later
-				if (mod.node.probability > 0 && mod.node.probability < min) {
-					min = mod.node.probability;
-				}
+				// // maintain minimum for later
+				// if (mod.node.probability > 0 && mod.node.probability < min) {
+				// 	min = mod.node.probability;
+				// }
 			}
 
-			// prune and recenter
-			this.pruneAndRecenter(min);
+			//debug 
+			console.log("alpha = " + alpha);
 
-			// add new entries
-			this.applyNovelty(function() {
-				global.stableSerialization = self.serializeToString(global.stableTree);
-				self.serializeToDatabase(global.stableSerialization);
-			});
+			console.log(modifiedNodes);
+
+			// prune and recenter
+			self.pruneAndRecenter(self.searchForMin());
+
+			// // add new entries
+			// self.applyNovelty(function() {
+			// 	global.stableSerialization = self.serializeToString(global.stableTree);
+			// 	self.serializeToDatabase(global.stableSerialization);
+			// });
 		});
 	}
 
@@ -224,9 +230,90 @@ module.exports = function() {
 		}
 	}
 
+	this.relu = function(x) {
+		return x > 0 ? x : 0;
+	}
+
 	// recenter and prune all <= 0 branches
 	this.pruneAndRecenter = function(min_prob) {
 
+		// debug
+		console.log("Attempting to prune with min prob " + min_prob);
+
+		var path = [];
+		var current = global.stableTree.root;
+		var next;
+
+		while (true) {
+
+			// keep track of current child branch we're searching
+			if (current.child_index != undefined) {
+				current.child_index++;
+			} else {
+				current.child_index = 0;
+			}
+
+			// recenter when first encountering a terminal node
+			if (current.child_index == 0 && (current.probability > 0 || current.children.length == 0)) {
+				console.log("Recentering '" + current.data + "' from " + current.probability + " to " + (current.probability - min_prob));
+				current.probability -= min_prob;	// recenter probability
+			}
+
+			// get next child
+			if (current.child_index < current.children.length) {
+				next = current.children[current.child_index];
+			} else {
+				next = undefined;
+				delete current.child_index;
+			}
+
+			if (next) {
+				// move to child
+				path.push(current);
+				current = next;
+			} else if (path.length > 0) {
+				// if dead leaf node
+				if (current.probability <= 0 && current.children.length == 0) {
+					while (true) {
+						// backtrack to last terminal node or last node with > 1 children
+						current = path.pop();
+						if (current.probability != 0 || current.children.length > 1) {
+							break;
+						}
+					}
+					// remove child (and thus, dead branch)
+					current.children.splice(current.child_index, 1);
+					current.child_index--;
+				} else {
+					// if normal leaf node, backtrack
+					current = path.pop();
+				}
+			} else {
+				// if no next child and path empty, break (back at root)
+				break;
+			}
+		}
+
+		console.log("Finished pruning.");
+		global.stableTree.log();
+
+	}
+
+	// determine minimum probability of stable tree
+	this.searchForMin = function() {
+		var stack = [global.stableTree.root];
+		var min = Number.POSITIVE_INFINITY;
+		while (stack.length > 0) {
+			var node = stack.pop();
+			stack.push.apply(stack, node.children);
+
+			// update min
+			if (node.probability > 0 && node.probability < min) {
+				min = node.probability;
+			}
+		}
+
+		return min;
 	}
 
 	// add trusted novelty entries into stable tree
