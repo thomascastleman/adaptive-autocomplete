@@ -264,8 +264,13 @@ function incrementNode(node) {
 		node.localDelta = 1
 	}
 
-	// if delta exceeds threshold !!!
-		// ping server here
+	if (node.localDelta > 1) {
+		socket.emit('modification', {
+			word: selectedCompletion.completion,
+			delta: 1
+		});
+		delete node.localDelta;
+	}
 }
 
 // decrement single node's probability
@@ -278,8 +283,13 @@ function decrementNode(node) {
 			node.localDelta = -1;
 		}
 
-		// if delta exceeds threshold
-			// ping server
+		if (node.localDelta < -1) {
+			socket.emit('modification', {
+				word: selectedCompletion.completion,
+				delta: -1
+			});
+			delete node.localDelta;
+		}
 	}
 }
 
