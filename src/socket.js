@@ -18,6 +18,20 @@ module.exports = function(s) {
 
 		// on client tree modification
 		socket.on('modification', function(data) {
+
+			// Search in word_table
+				// if exists: allow mod into mod table
+				// if doesn't exist:
+					// check against local new words array
+						// if does exist, don't allow (already used new word)
+						// if doesn't exist
+							// enter in novelty table
+
+
+
+
+
+
 			con.query('INSERT INTO modifications (word, delta) VALUES (?, ?) ON DUPLICATE KEY UPDATE delta = delta + ?;', [data.word, data.delta, data.delta], function(err, result) {
 				if (err) throw err;
 				console.log("Inserted '" + data.word + "' with delta " + data.delta + " into mod table.");

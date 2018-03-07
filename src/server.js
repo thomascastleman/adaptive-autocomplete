@@ -17,7 +17,6 @@ var Node			= require('./Node.js');
 var Tree			= require('./Tree.js');
 var database		= require('./database.js');
 var util			= require('./utilities.js');
-util = new util();
 
 var port = 8080;
 
