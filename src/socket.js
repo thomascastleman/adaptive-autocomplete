@@ -25,3 +25,6 @@ module.exports = function(s) {
 		});
 	});
 }
+
+// check if a record exists:
+// SELECT COUNT(*) FROM <table> WHERE <condition>;

@@ -134,7 +134,7 @@ module.exports = function() {
 			// prune and recenter
 			self.pruneAndRecenter(self.searchForMin());
 
-			// DEBUG!!!!! since we haven't figured out novelty yet
+			// for DEBUG!!!!! since we haven't figured out novelty yet
 			callback();
 
 			// // add new entries
@@ -309,7 +309,7 @@ module.exports = function() {
 
 	// add trusted novelty entries into stable tree
 	this.applyNovelty = function(callback) {
-
+		callback();
 	}
 
 }
