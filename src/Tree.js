@@ -1,8 +1,7 @@
 var Node = require('./Node.js');
 
-module.exports = function(_treeQuality) {
+module.exports = function() {
 
-	this.treeQuality = _treeQuality;
 	this.root = new Node(undefined, undefined);
 
 	this.log = function() {

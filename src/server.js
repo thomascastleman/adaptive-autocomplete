@@ -8,30 +8,19 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.engine('html', mustacheExpress());
 app.use('/', express.static('static'));
 
-var moment          = require('moment');
 var server          = require('http').createServer(app);
 var socket          = require('socket.io')(server);
-
-var fs = require('fs');	// for temp debug tree data
-
+var fs 				= require('fs');	// for temp debug tree data
 var listeners		= require('./socket.js')(socket);
 var routes          = require('./routes.js')(app);
 var Node			= require('./Node.js');
 var Tree			= require('./Tree.js');
-var Database		= require('./Database.js');
+var database		= require('./database.js');
 
 var port = 8080;
 
-global.constants = {
-	STABLE: 0,
-	UNSTABLE: 1,
-	NOVELTY: 2
-};
-
-// init trees
-global.stableTree = new Tree(constants.STABLE);
-global.unstableTree = new Tree(constants.UNSTABLE);
-global.noveltyTree = new Tree(constants.NOVELTY);
+global.stableTree = new Tree();
+global.stableSerialization = "";
 
 server.listen(port, function() {
 	console.log('Adaptive autocomplete server listening on port %d', port);
@@ -45,8 +34,9 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 	if (err) throw err;
 
 	var words = data.split(" ");
-
 	for (var i = 0; i < words.length; i++) {
 		stableTree.increment(words[i]);
 	}
+
+	global.stableSerialization = stableTree.serialize();
 });

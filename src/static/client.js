@@ -32,18 +32,14 @@ $(document).ready(function() {
 
 	// listen for initial data needed to construct trees
 	socket.on('initial data', function(data) {
-		console.log("Initial data received");
-
 		// evaluate definitions of node and tree classes
 		var node_def = 'Node = ' + data.node_class + ';';
 		var tree_def = 'Tree = ' + data.tree_class + ';';
 		eval(node_def + tree_def);
 
 		// init char tree from tree data
-		charTree = new Tree(undefined);
+		charTree = new Tree();
 		charTree.construct(data.tree_data);
-
-		// init tracepoint
 		tracepoint = charTree.root;
 	});
 
@@ -60,9 +56,7 @@ $(document).ready(function() {
 			}
 
 			// establish fragment if backspaced
-			if (fragment == '') {
-				fragment = $chatbox.val().split(" ").pop();
-			}
+			if (fragment == '') fragment = $chatbox.val().split(" ").pop();
 
 			fragment += event.key;	// add key to fragment
 
@@ -167,7 +161,11 @@ $(document).ready(function() {
 					hideCompletions();
 					fillCompletion(selectedCompletion.completion);
 					selectedCompletion.node.probability++;
-					socket.emit('completion accepted', {word: selectedCompletion.completion});
+					
+					socket.emit('modification', {
+						word: selectedCompletion.completion,
+						delta: 1
+					});
 				} else {
 					// SEND CHAT MESSAGE HERE
 				}
