@@ -28,7 +28,10 @@ CREATE TABLE novelty (
 	user_frequency INT
 );
 
-
+-- all words in stable tree
+CREATE TABLE word_table (
+	word VARCHAR(32)
+);
 
 
 -- -- -- debug !!
