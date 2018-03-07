@@ -103,6 +103,23 @@ function constructFromDatabase(tree, callback) {
 	});
 }
 
+// create word_table if doesn't exist
+function establishWordTable(callback) {
+	con.query('DELETE FROM word_table;', function(err, result) {
+		if (err) throw err;
+
+		var completions = global.stableTree.getSubtreeCompletions(global.stableTree.root, '');
+		for (var i = 0; i < completions.length; i++) {
+			completions[i] = [completions[i].completion];
+		}
+
+		con.query('INSERT INTO word_table (word) VALUES ?;', [completions], function(err, result) {
+			if (err) throw err;
+			callback();
+		});
+	});
+}
+
 // apply filtered modifications to stable tree and update all serializations
 function applyFilter(callback) {
 	var modifiedNodes;
@@ -313,5 +330,6 @@ module.exports = {
 	serializeToString: serializeToString,
 	serializeToDatabase: serializeToDatabase,
 	constructFromDatabase: constructFromDatabase,
-	applyFilter: applyFilter
+	applyFilter: applyFilter,
+	establishWordTable: establishWordTable
 }
