@@ -147,7 +147,7 @@ function applyFilter(callback) {
 function getNodePointers(callback) {
 	var nodes = [];
 	var deltas = [];
-	var novelty = [];
+	// var novelty = [];
 
 	// get all modification data
 	con.query('SELECT * FROM modifications;', function(err, result) {
@@ -164,21 +164,22 @@ function getNodePointers(callback) {
 					if (search_res.remainingBranch.length == 0) {
 						nodes.push({node: search_res.node, delta: result[i].delta});	// keep track of node pointer with delta
 						deltas.push(Math.abs(result[i].delta));	// add delta abs value for alpha calculation later
-					} else if (result[i].delta > 0) {
-						// insert into novelty (if pos delta)
-						novelty.push([result[i].word, result[i].delta]);
-					}
+					} 
+					// else if (result[i].delta > 0) {
+					// 	// insert into novelty (if pos delta)
+					// 	novelty.push([result[i].word, result[i].delta]);
+					// }
 				});
 			}
 		}
 
-		if (novelty.length > 0) {
-			// batch insert all novelty entries
-			con.query('INSERT INTO novelty (word, user_frequency) VALUES ?;', [novelty], function(err, result) {
-				if (err) throw err;
-				console.log("Inserted " + novelty.length + " entries into novelty");
-			});
-		}
+		// if (novelty.length > 0) {
+		// 	// batch insert all novelty entries
+		// 	con.query('INSERT INTO novelty (word, user_frequency) VALUES ?;', [novelty], function(err, result) {
+		// 		if (err) throw err;
+		// 		console.log("Inserted " + novelty.length + " entries into novelty");
+		// 	});
+		// }
 
 		callback({nodes: nodes, deltas: deltas});
 	});
