@@ -38,6 +38,7 @@ module.exports = function(s) {
 
 							con.query('INSERT INTO novelty (word, user_frequency) VALUES (?, 1) ON DUPLICATE KEY UPDATE user_frequency = user_frequency + 1;', [data.word], function(err, result) {
 								if (err) throw err;
+								console.log("Inserted '" + data.word + "' into novelty");
 							});
 						}
 

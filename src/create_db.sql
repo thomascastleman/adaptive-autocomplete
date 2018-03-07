@@ -25,7 +25,8 @@ CREATE TABLE modifications (
 -- new words
 CREATE TABLE novelty (
 	word VARCHAR(32),
-	user_frequency INT
+	user_frequency INT,
+	PRIMARY KEY (word)
 );
 
 -- all words in stable tree

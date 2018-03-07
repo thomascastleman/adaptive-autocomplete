@@ -29,11 +29,6 @@ server.listen(port, function() {
 
 // debug ---------------------------------------------------------
 
-// // construct tree from db serialization
-// util.constructFromDatabase(global.stableTree, function() {
-// 	global.stableSerialization = util.serializeToString(global.stableTree);
-// });
-
 // read words from dictionary into tree
 fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 	if (err) throw err;
@@ -45,9 +40,5 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 
 	global.stableSerialization = util.serializeToString(global.stableTree);
 
-
-
-	util.establishWordTable(function() {
-		console.log("Done with word table");
-	});
+	util.establishWordTable(function() { console.log("Finished."); });
 });
