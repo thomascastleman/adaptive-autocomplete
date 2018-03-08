@@ -42,7 +42,6 @@ module.exports = function(s) {
 								console.log("Inserted '" + data.word + "' into novelty");
 							});
 						}
-
 					}
 				});
 			}
