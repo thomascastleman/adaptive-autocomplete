@@ -23,6 +23,8 @@ var port = 8080;
 global.stableTree = new Tree();
 global.stableSerialization = "";
 
+global.noveltyThreshold = 0.9;
+
 server.listen(port, function() {
 	console.log('Adaptive autocomplete server listening on port %d', port);
 });
@@ -40,5 +42,7 @@ fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
 
 	global.stableSerialization = util.serializeToString(global.stableTree);
 
-	util.establishWordTable(function() { console.log("Finished."); });
+	util.applyNovelty(function() {
+		console.log("Finished applying novelty");
+	});
 });

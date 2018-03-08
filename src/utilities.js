@@ -323,7 +323,28 @@ function searchForMin() {
 
 // add trusted novelty entries into stable tree
 function applyNovelty(callback) {
-	callback();
+	// cut off all single user additions (low integrity)
+	con.query('SELECT * FROM novelty WHERE user_frequency > 1 ORDER BY user_frequency DESC;', function(err, result) {
+		if (err) throw err;
+		if (result.length > 0) {
+			// calculate threshold
+			var threshold = result[0].user_frequency * global.noveltyThreshold;
+
+			for (var i = 0; i < result.length; i++) {
+				// if word has high enough frequency and is ensured safe
+				if (result[i].user_frequency >= threshold && qualityControl(result[i].word)) {
+					global.stableTree.increment(result[i].word);
+				}
+			}
+
+			callback();
+		}
+	});
+}
+
+// check if word is safe to enter in the tree
+function qualityControl(word) {
+	return word.indexOf(' ') == -1;
 }
 
 module.exports = {
@@ -331,5 +352,6 @@ module.exports = {
 	serializeToDatabase: serializeToDatabase,
 	constructFromDatabase: constructFromDatabase,
 	applyFilter: applyFilter,
-	establishWordTable: establishWordTable
+	establishWordTable: establishWordTable,
+	applyNovelty: applyNovelty
 }
