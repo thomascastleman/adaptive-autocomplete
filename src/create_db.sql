@@ -37,10 +37,7 @@ CREATE TABLE word_table (
 -- -- -- debug !!
 
 INSERT INTO novelty (word, user_frequency) 
-VALUES ('test', 20), ('dab', 11), ('another', 12), ('this', 15);
-
--- INSERT INTO modifications (word, delta)
--- VALUES ('at', 1), ('ion', 2);
+VALUES ('new', 20), ('dab', 11), ('trendy', 12), ('fakeword', 15);
 
 INSERT INTO modifications (word, delta)
-VALUES ('test', 4), ('another', 3), ('this', 4), ('but', 10), ('and', 73), ('constant', 0), ('constantly', 12), ('discuss', 5), ('everyone', 15), ('everything', 13), ('discussion', 3);
+VALUES ('test', 2), ('another', 3), ('this', -1);

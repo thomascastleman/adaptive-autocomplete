@@ -31,18 +31,35 @@ server.listen(port, function() {
 
 // debug ---------------------------------------------------------
 
-// read words from dictionary into tree
-fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
-	if (err) throw err;
+// // read words from dictionary into tree
+// fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
+// 	if (err) throw err;
 
-	var words = data.split(" ");
-	for (var i = 0; i < words.length; i++) {
-		stableTree.increment(words[i]);
-	}
+// 	var words = data.split(" ");
+// 	for (var i = 0; i < words.length; i++) {
+// 		stableTree.increment(words[i]);
+// 	}
 
-	global.stableSerialization = util.serializeToString(global.stableTree);
+// 	global.stableSerialization = util.serializeToString(global.stableTree);
 
-	util.applyNovelty(function() {
-		console.log("Finished applying novelty");
-	});
+// 	util.applyFilter(function() {
+// 		console.log("Finished applying filter.");
+// 	});
+// });
+
+global.stableTree.increment('another');
+global.stableTree.increment('another');
+global.stableTree.increment('another');
+
+global.stableTree.increment('test');
+global.stableTree.increment('test');
+
+global.stableTree.increment('this');
+global.stableTree.increment('this');
+global.stableTree.increment('this');
+global.stableTree.increment('this');
+
+
+util.applyFilter(function() {
+	console.log("Finished applying filter");
 });

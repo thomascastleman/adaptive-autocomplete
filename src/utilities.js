@@ -137,11 +137,11 @@ function applyFilter(callback) {
 			var mod = modifiedNodes[i];
 
 			// calculate applied change to make
-			var delta_k = delta_k(Math.abs(mod.delta), alpha);
-			if (mod.delta < 0) delta_k *= -1;
+			var dk = delta_k(Math.abs(mod.delta), alpha);
+			if (mod.delta < 0) dk *= -1;
 
 			// update probability (if negative, make 0)
-			mod.node.probability = relu(mod.node.probability + delta_k);
+			mod.node.probability = relu(mod.node.probability + dk);
 		}
 
 		// prune and recenter
@@ -154,6 +154,7 @@ function applyFilter(callback) {
 
 			// write updated tree to db
 			serializeToDatabase(global.stableSerialization, function() {
+				console.log("Finished serializing to db");
 				// init word table
 				establishWordTable(callback);
 			});
@@ -305,6 +306,7 @@ function searchForMin() {
 		}
 	}
 
+	console.log("Found min probability as " + min);
 	return min;
 }
 
@@ -313,10 +315,17 @@ function applyNovelty(callback) {
 	// cut off all single user additions (low integrity)
 	con.query('SELECT * FROM novelty WHERE user_frequency > 1 ORDER BY user_frequency DESC;', function(err, result) {
 		if (err) throw err;
+
+		// clear novelty table
+		con.query('DELETE FROM novelty;', function(err, result) {
+			if (err) throw err;
+		});
+
 		// if any entries > 1
 		if (result.length > 0) {
 			// calculate threshold
 			var threshold = result[0].user_frequency * global.noveltyThreshold;
+			console.log("Novelty threshold: " + threshold);
 
 			for (var i = 0; i < result.length; i++) {
 				// if word has high enough frequency and is ensured safe
@@ -339,9 +348,5 @@ module.exports = {
 	serializeToString: serializeToString,
 	serializeToDatabase: serializeToDatabase,
 	constructFromDatabase: constructFromDatabase,
-	applyFilter: applyFilter,
-	establishWordTable: establishWordTable,
-
-	// debug
-	applyNovelty: applyNovelty
+	applyFilter: applyFilter
 }
