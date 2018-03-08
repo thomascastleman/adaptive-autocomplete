@@ -20,12 +20,28 @@ var util			= require('./utilities.js');
 
 var port = 8080;
 
+// tree data
 global.stableTree = new Tree();
 global.stableSerialization = "";
-global.noveltyThreshold = 0.9;
 
-server.listen(port, function() {
-	console.log('Adaptive autocomplete server listening on port %d', port);
+// thresholds
+global.noveltyThreshold = 0.9;
+global.netDeltaThreshold = 100;
+
+// net change in stable tree
+global.netDelta = 0;
+
+console.log("Novelty Threshold @ " + global.noveltyThreshold);
+console.log("Net Delta Threshold @ " + global.netDeltaThreshold + "\n");
+
+// bring service to working state
+util.initialize(function() {
+	console.log("Finished initialization.\n");
+
+	// launch server
+	server.listen(port, function() {
+		console.log('Adaptive autocomplete server listening on port %d', port);
+	});
 });
 
 // debug ---------------------------------------------------------
@@ -41,9 +57,3 @@ server.listen(port, function() {
 
 // 	global.stableSerialization = util.serializeToString(global.stableTree);
 // });
-
-
-util.initialize(function() {
-	console.log("Finished initialization");
-	console.log(global.stableTree.getSubtreeCompletions(global.stableTree.root, ''));
-});

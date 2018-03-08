@@ -2,6 +2,23 @@ var Node = require('./Node.js');
 var database = require('./database.js');
 var con = database.connection;
 
+// increment global tree change, apply filter when threshold reached
+function incrementNetDelta() {
+	global.netDelta++;
+
+	if (global.netDelta >= global.netDeltaThreshold) {
+		global.netDelta = 0;
+
+		applyFilter(function() {
+			var d = new Date();
+			var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
+			var date = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
+			console.log("Filtration applied at " + time + " on " + date);
+		});
+	}
+}
+
 // establish all necessary resources to reach functionality
 function initialize(callback) {
 	console.log("Running initialization...");
@@ -11,42 +28,43 @@ function initialize(callback) {
 		con.query('SELECT * FROM stable_tree;', function(err, stable_result) {
 			if (err) throw err;
 
-			var table_name;
-			if (swap_result.length > stable_result.length) {
-				table_name = 'swap_tree';
-			} else {
-				table_name = 'stable_tree';
-			}
+			// if serialization exists
+			if (swap_result.length > 0 || stable_result.length > 0) {
 
-			// construct tree from known good table
-			constructFromDatabase(table_name, function() {
-				console.log("Stable tree constructed from " + table_name + ".");
-				global.stableSerialization = serializeToString(global.stableTree);
+				var table_name;
+				if (swap_result.length >= stable_result.length) {
+					table_name = 'swap_tree';
+				} else {
+					table_name = 'stable_tree';
+				}
 
-				establishWordTable(function() {
-					console.log("Word table established.");
+				// construct tree from known good table
+				constructFromDatabase(table_name, function() {
+					console.log("Stable tree constructed from " + table_name + ".");
+					global.stableSerialization = serializeToString(global.stableTree);
 
-					// restore db to functioning state
-					if (table_name == 'swap_tree') {
-						transferSwapToStable(function() {
-							console.log("Transferred swap table into stable tree table");
-							callback();
-							return;
-						});
-					} else {
-						if (swap_result.length != 0) {
+					establishWordTable(function() {
+						console.log("Word table established.");
+
+						// restore db to functioning state
+						if (table_name == 'swap_tree') {
+							transferSwapToStable(function() {
+								console.log("Transferred swap table into stable tree table");
+								callback();
+								return;
+							});
+						} else {
 							con.query('DELETE FROM swap_tree;', function(err, result) {
 								if (err) throw err;
 								callback();
 								return;
 							});
-						} else {
-							callback();
-							return;
 						}
-					}
+					});
 				});
-			});
+			} else {
+				console.log("No serialization found. Unable to construct.");
+			}
 		});
 	});
 }
@@ -157,6 +175,7 @@ function establishWordTable(callback) {
 	con.query('DELETE FROM word_table;', function(err, result) {
 		if (err) throw err;
 
+		// get all words encoded by tree
 		var completions = global.stableTree.getSubtreeCompletions(global.stableTree.root, '');
 		for (var i = 0; i < completions.length; i++) {
 			completions[i] = [completions[i].completion];
@@ -398,5 +417,6 @@ module.exports = {
 	serializeToString: serializeToString,
 	serializeToDatabase: serializeToDatabase,
 	constructFromDatabase: constructFromDatabase,
-	applyFilter: applyFilter
+	applyFilter: applyFilter,
+	incrementNetDelta: incrementNetDelta
 }

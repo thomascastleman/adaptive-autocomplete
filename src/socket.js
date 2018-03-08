@@ -1,6 +1,7 @@
 
 var nodeClass 	= require('./Node.js').toString();
 var treeClass 	= require('./Tree.js').toString();
+var util		= require('./utilities.js');
 var database 	= require('./database.js');
 var con = database.connection;
 
@@ -30,6 +31,7 @@ module.exports = function(s) {
 						// apply modification
 						con.query('INSERT INTO modifications (word, delta) VALUES (?, ?) ON DUPLICATE KEY UPDATE delta = delta + ?;', [data.word, data.delta, data.delta], function(err, result) {
 							if (err) throw err;
+							util.incrementNetDelta();
 							console.log("Inserted '" + data.word + "' with delta " + data.delta + " into mod table.");
 						});
 					} else {
@@ -39,6 +41,7 @@ module.exports = function(s) {
 
 							con.query('INSERT INTO novelty (word, user_frequency) VALUES (?, 1) ON DUPLICATE KEY UPDATE user_frequency = user_frequency + 1;', [data.word], function(err, result) {
 								if (err) throw err;
+								util.incrementNetDelta();
 								console.log("Inserted '" + data.word + "' into novelty");
 							});
 						}
