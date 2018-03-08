@@ -22,7 +22,6 @@ var port = 8080;
 
 global.stableTree = new Tree();
 global.stableSerialization = "";
-
 global.noveltyThreshold = 0.9;
 
 server.listen(port, function() {
@@ -41,25 +40,10 @@ server.listen(port, function() {
 // 	}
 
 // 	global.stableSerialization = util.serializeToString(global.stableTree);
-
-// 	util.applyFilter(function() {
-// 		console.log("Finished applying filter.");
-// 	});
 // });
 
-global.stableTree.increment('another');
-global.stableTree.increment('another');
-global.stableTree.increment('another');
 
-global.stableTree.increment('test');
-global.stableTree.increment('test');
-
-global.stableTree.increment('this');
-global.stableTree.increment('this');
-global.stableTree.increment('this');
-global.stableTree.increment('this');
-
-
-util.applyFilter(function() {
-	console.log("Finished applying filter");
+util.initialize(function() {
+	console.log("Finished initialization");
+	console.log(global.stableTree.getSubtreeCompletions(global.stableTree.root, ''));
 });

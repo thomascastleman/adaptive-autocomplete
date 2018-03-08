@@ -2,6 +2,55 @@ var Node = require('./Node.js');
 var database = require('./database.js');
 var con = database.connection;
 
+// establish all necessary resources to reach functionality
+function initialize(callback) {
+	console.log("Running initialization...");
+	
+	con.query('SELECT * FROM swap_tree;', function(err, swap_result) {
+		if (err) throw err;
+		con.query('SELECT * FROM stable_tree;', function(err, stable_result) {
+			if (err) throw err;
+
+			var table_name;
+			if (swap_result.length > stable_result.length) {
+				table_name = 'swap_tree';
+			} else {
+				table_name = 'stable_tree';
+			}
+
+			// construct tree from known good table
+			constructFromDatabase(table_name, function() {
+				console.log("Stable tree constructed from " + table_name + ".");
+				global.stableSerialization = serializeToString(global.stableTree);
+
+				establishWordTable(function() {
+					console.log("Word table established.");
+
+					// restore db to functioning state
+					if (table_name == 'swap_tree') {
+						transferSwapToStable(function() {
+							console.log("Transferred swap table into stable tree table");
+							callback();
+							return;
+						});
+					} else {
+						if (swap_result.length != 0) {
+							con.query('DELETE FROM swap_tree;', function(err, result) {
+								if (err) throw err;
+								callback();
+								return;
+							});
+						} else {
+							callback();
+							return;
+						}
+					}
+				});
+			});
+		});
+	});
+}
+
 // write tree data to string
 function serializeToString(tree) {
 
@@ -62,44 +111,44 @@ function serializeToDatabase(serialization, callback) {
 		// push tree serialization to swap table in db
 		con.query('INSERT INTO swap_tree (data, probability, uid_parent) VALUES ?;', [values], function(err, result) {
 			if (err) throw err;
-			// remove all previous records of stable tree
-			con.query('DELETE FROM stable_tree;', function(err, result) {
-				if (err) throw err;
-				// migrate tree data into actual table
-				con.query('INSERT INTO stable_tree SELECT * FROM swap_tree;', function(err, result) {
-					if (err) throw err;
-					// reset swap table for later use
-					con.query('DELETE FROM swap_tree;', function(err, result) {
-						if (err) throw err;
-						callback();
-					});
-				});
-			});
+			transferSwapToStable(callback);
 		});
 	}
 }
 
-// construct tree from stable_tree table
-function constructFromDatabase(tree, callback) {
+// transfer records from swap_table to stable_tree
+function transferSwapToStable(callback) {
+	// remove all previous records of stable tree
+	con.query('DELETE FROM stable_tree;', function(err, result) {
+		if (err) throw err;
+		// migrate tree data into actual table
+		con.query('INSERT INTO stable_tree SELECT * FROM swap_tree;', function(err, result) {
+			if (err) throw err;
+			// reset swap table for later use
+			con.query('DELETE FROM swap_tree;', function(err, result) {
+				if (err) throw err;
+				callback();
+			});
+		});
+	});
+}
+
+// construct stable tree from given tree table
+function constructFromDatabase(table_name, callback) {
 	// pull tree data from db
-	con.query('SELECT * FROM stable_tree;', function(err, result) {
-		// ensure serialization is not corrupted
-		if (result.length % 3 != 0) {
-			console.log("UNABLE TO CONSTRUCT: ERR IN SERIALIZATION");
-		} else {
-			var idToNode = new Array();	// temp link ids to node objects
-			idToNode[0] = tree.root;
+	con.query('SELECT * FROM ' + table_name + ';', function(err, result) {
+		var idToNode = new Array();	// temp link ids to node objects
+		idToNode[0] = global.stableTree.root;
 
-			// iterate through data in triplets (data, probability, parent id)
-			for (var i = 0; i < result.length; i++) {
-				var n = new Node(result[i].data, parseFloat(result[i].probability));
-				var parent = idToNode[result[i].uid_parent];	// get parent
-				idToNode[result[i].uid] = n;
-				parent.children.push(n);
-			}
-
-			callback();
+		// iterate through data in triplets (data, probability, parent id)
+		for (var i = 0; i < result.length; i++) {
+			var n = new Node(result[i].data, parseFloat(result[i].probability));
+			var parent = idToNode[result[i].uid_parent];	// get parent
+			idToNode[result[i].uid] = n;
+			parent.children.push(n);
 		}
+
+		callback();
 	});
 }
 
@@ -345,6 +394,7 @@ function qualityControl(word) {
 }
 
 module.exports = {
+	initialize: initialize,
 	serializeToString: serializeToString,
 	serializeToDatabase: serializeToDatabase,
 	constructFromDatabase: constructFromDatabase,
