@@ -17,16 +17,14 @@ CREATE TABLE swap_tree LIKE stable_tree;
 
 -- modifications table
 CREATE TABLE modifications (
-	word VARCHAR(32),
-	delta INT,
-	PRIMARY KEY (word)
+	word VARCHAR(32) NOT NULL UNIQUE,
+	delta INT
 );
 
 -- new words
 CREATE TABLE novelty (
-	word VARCHAR(32),
-	user_frequency INT,
-	PRIMARY KEY (word)
+	word VARCHAR(32) NOT NULL UNIQUE,
+	user_frequency INT
 );
 
 -- all words in stable tree
@@ -35,10 +33,14 @@ CREATE TABLE word_table (
 );
 
 
+
 -- -- -- debug !!
+
+INSERT INTO novelty (word, user_frequency) 
+VALUES ('test', 20), ('dab', 11), ('another', 12), ('this', 15);
 
 -- INSERT INTO modifications (word, delta)
 -- VALUES ('at', 1), ('ion', 2);
 
--- INSERT INTO modifications (word, delta)
--- VALUES ('test', 4), ('another', 3), ('this', 4), ('but', 10), ('and', 73), ('constant', 0), ('constantly', 12), ('discuss', 5), ('everyone', 15), ('everything', 13), ('discussion', 3);
+INSERT INTO modifications (word, delta)
+VALUES ('test', 4), ('another', 3), ('this', 4), ('but', 10), ('and', 73), ('constant', 0), ('constantly', 12), ('discuss', 5), ('everyone', 15), ('everything', 13), ('discussion', 3);

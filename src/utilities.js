@@ -103,7 +103,7 @@ function constructFromDatabase(tree, callback) {
 	});
 }
 
-// create word_table if doesn't exist
+// create word_table (off of stable tree) if doesn't exist
 function establishWordTable(callback) {
 	con.query('DELETE FROM word_table;', function(err, result) {
 		if (err) throw err;
@@ -147,16 +147,17 @@ function applyFilter(callback) {
 		// prune and recenter
 		pruneAndRecenter(searchForMin());
 
-		// for DEBUG!!!!! since we haven't figured out novelty yet
-		callback();
+		// add new entries
+		applyNovelty(function() {
+			// record string serialization of updated tree
+			global.stableSerialization = serializeToString(global.stableTree);
 
-		// // add new entries
-		// self.applyNovelty(function() {
-		// 	global.stableSerialization = self.serializeToString(global.stableTree);
-		// 	self.serializeToDatabase(global.stableSerialization, function() {
-		// 		callback();
-		// 	});
-		// });
+			// write updated tree to db
+			serializeToDatabase(global.stableSerialization, function() {
+				// init word table
+				establishWordTable(callback);
+			});
+		});
 	});
 }
 
@@ -164,15 +165,13 @@ function applyFilter(callback) {
 function getNodePointers(callback) {
 	var nodes = [];
 	var deltas = [];
-	// var novelty = [];
 
 	// get all modification data
 	con.query('SELECT * FROM modifications;', function(err, result) {
-		// // debug: need to uncomment this!
-		// // clear mod table
-		// con.query('DELETE FROM modifications;', function(err, res) {
-		// 	if (err) throw err;
-		// });
+		// clear mod table
+		con.query('DELETE FROM modifications;', function(err, res) {
+			if (err) throw err;
+		});
 
 		for (var i = 0; i < result.length; i++) {
 			if (Math.abs(result[i].delta) > 0) {
@@ -181,22 +180,10 @@ function getNodePointers(callback) {
 					if (search_res.remainingBranch.length == 0) {
 						nodes.push({node: search_res.node, delta: result[i].delta});	// keep track of node pointer with delta
 						deltas.push(Math.abs(result[i].delta));	// add delta abs value for alpha calculation later
-					} 
-					// else if (result[i].delta > 0) {
-					// 	// insert into novelty (if pos delta)
-					// 	novelty.push([result[i].word, result[i].delta]);
-					// }
+					}
 				});
 			}
 		}
-
-		// if (novelty.length > 0) {
-		// 	// batch insert all novelty entries
-		// 	con.query('INSERT INTO novelty (word, user_frequency) VALUES ?;', [novelty], function(err, result) {
-		// 		if (err) throw err;
-		// 		console.log("Inserted " + novelty.length + " entries into novelty");
-		// 	});
-		// }
 
 		callback({nodes: nodes, deltas: deltas});
 	});
@@ -326,6 +313,7 @@ function applyNovelty(callback) {
 	// cut off all single user additions (low integrity)
 	con.query('SELECT * FROM novelty WHERE user_frequency > 1 ORDER BY user_frequency DESC;', function(err, result) {
 		if (err) throw err;
+		// if any entries > 1
 		if (result.length > 0) {
 			// calculate threshold
 			var threshold = result[0].user_frequency * global.noveltyThreshold;
@@ -353,5 +341,7 @@ module.exports = {
 	constructFromDatabase: constructFromDatabase,
 	applyFilter: applyFilter,
 	establishWordTable: establishWordTable,
+
+	// debug
 	applyNovelty: applyNovelty
 }

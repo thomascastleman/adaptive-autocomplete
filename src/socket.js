@@ -9,6 +9,7 @@ module.exports = function(s) {
 	// on client connection through socket
 	s.on('connection', function(socket) {
 
+		// maintain new words used by this user to limit access to novelty table
 		var used_new_words = [];
 
 		// send all necessary data on connection
