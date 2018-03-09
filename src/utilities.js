@@ -19,6 +19,14 @@ function incrementNetDelta() {
 	}
 }
 
+// get the value of net delta if interrupted
+function establishNetDelta() {
+	con.query('SELECT * FROM modifications UNION ALL SELECT * FROM novelty;', function(err, result) {
+		if (err) throw err;
+		global.netDelta = result.length;
+	});
+}
+
 // establish all necessary resources to reach functionality
 function initialize(callback) {
 	console.log("Running initialization...");
@@ -46,6 +54,8 @@ function initialize(callback) {
 					establishWordTable(function() {
 						console.log("Word table established.");
 
+						establishNetDelta();	// init net delta
+
 						// restore db to functioning state
 						if (table_name == 'swap_tree') {
 							transferSwapToStable(function() {
@@ -56,8 +66,11 @@ function initialize(callback) {
 						} else {
 							con.query('DELETE FROM swap_tree;', function(err, result) {
 								if (err) throw err;
-								callback();
-								return;
+								con.query('ALTER TABLE swap_tree AUTO_INCREMENT = 1;', function(err, result) {
+									if (err) throw err;
+									callback();
+									return;
+								});
 							});
 						}
 					});
@@ -139,13 +152,19 @@ function transferSwapToStable(callback) {
 	// remove all previous records of stable tree
 	con.query('DELETE FROM stable_tree;', function(err, result) {
 		if (err) throw err;
-		// migrate tree data into actual table
-		con.query('INSERT INTO stable_tree SELECT * FROM swap_tree;', function(err, result) {
+		con.query('ALTER TABLE stable_tree AUTO_INCREMENT = 1;', function(err, result) {
 			if (err) throw err;
-			// reset swap table for later use
-			con.query('DELETE FROM swap_tree;', function(err, result) {
+			// migrate tree data into actual table
+			con.query('INSERT INTO stable_tree SELECT * FROM swap_tree;', function(err, result) {
 				if (err) throw err;
-				callback();
+				// reset swap table for later use
+				con.query('DELETE FROM swap_tree;', function(err, result) {
+					if (err) throw err;
+					con.query('ALTER TABLE swap_tree AUTO_INCREMENT = 1;', function(err, result) {
+						if (err) throw err;
+						callback();
+					});
+				});
 			});
 		});
 	});
@@ -207,6 +226,8 @@ function applyFilter(callback) {
 			// calculate applied change to make
 			var dk = delta_k(Math.abs(mod.delta), alpha);
 			if (mod.delta < 0) dk *= -1;
+
+			console.log('Applying ' + dk + ' to ' + mod.node.probability);
 
 			// update probability (if negative, make 0)
 			mod.node.probability = relu(mod.node.probability + dk);

@@ -56,4 +56,7 @@ util.initialize(function() {
 // 	}
 
 // 	global.stableSerialization = util.serializeToString(global.stableTree);
+// 	util.serializeToDatabase(global.stableSerialization, function() {
+// 		console.log("Finished serializign");
+// 	});
 // });
