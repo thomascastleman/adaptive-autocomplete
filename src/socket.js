@@ -12,6 +12,7 @@ module.exports = function(s) {
 
 		// maintain new words used by this user to limit access to novelty table
 		var used_new_words = [];
+		var lastMod = new Date();
 
 		// send all necessary data on connection
 		socket.emit('initial data', {
@@ -22,6 +23,16 @@ module.exports = function(s) {
 
 		// on client tree modification
 		socket.on('modification', function(data) {
+			var newMod = new Date();
+			var elapsed = (newMod.getTime() / 1000) - (lastMod.getTime() / 1000);
+			
+			// less than half a second since last modification, disconnect
+			if (elapsed <= 0.5) {
+				socket.disconnect();
+			} else {
+				lastMod = newMod;
+			}
+			
 			if (data != undefined) {
 				// check if word exists in stable tree
 				con.query('SELECT * FROM word_table WHERE word = ?;', [data.word], function(err, result) {
