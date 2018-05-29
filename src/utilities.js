@@ -10,11 +10,7 @@ function incrementNetDelta() {
 		global.netDelta = 0;
 
 		applyFilter(function() {
-			var d = new Date();
-			var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-			var date = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
-
-			console.log("Filtration applied at " + time + " on " + date);
+			// maybe consider writing to a log file
 		});
 	}
 }
@@ -39,12 +35,7 @@ function initialize(callback) {
 			// if serialization exists
 			if (swap_result.length > 0 || stable_result.length > 0) {
 
-				var table_name;
-				if (swap_result.length >= stable_result.length) {
-					table_name = 'swap_tree';
-				} else {
-					table_name = 'stable_tree';
-				}
+				var table_name = swap_result.length >= stable_result.length ? 'swap_tree' : 'stable_tree';
 
 				// construct tree from known good table
 				constructFromDatabase(table_name, function() {
@@ -173,7 +164,8 @@ function transferSwapToStable(callback) {
 // construct stable tree from given tree table
 function constructFromDatabase(table_name, callback) {
 	// pull tree data from db
-	con.query('SELECT * FROM ?;', [table_name], function(err, result) {
+	con.query('SELECT * FROM ' + table_name + ';', function(err, result) {
+		if (err) throw err;
 		var idToNode = new Array();	// temp link ids to node objects
 		idToNode[0] = global.stableTree.root;
 

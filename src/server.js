@@ -44,7 +44,7 @@ util.initialize(function() {
 	});
 });
 
-// debug ---------------------------------------------------------
+// // debug ---------------------------------------------------------
 
 // // read words from dictionary into tree
 // fs.readFile('./lots_of_words.txt', 'utf8', function (err, data) {
@@ -57,6 +57,6 @@ util.initialize(function() {
 
 // 	global.stableSerialization = util.serializeToString(global.stableTree);
 // 	util.serializeToDatabase(global.stableSerialization, function() {
-// 		console.log("Finished serializign");
+// 		console.log("Finished serializing");
 // 	});
 // });
