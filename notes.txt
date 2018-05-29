@@ -321,3 +321,43 @@ automa			continue tracing as normal
 
 
 -------------------------------------------
+
+
+// // --------- CHAT ---------------
+
+
+need to use express-socket.io-session
+
+CHAT SCHEME::::
+
+TABLE users
+	int uid
+	string username
+
+TABLE massages
+	int uid
+	int user
+	int date
+	int room
+	string content
+
+TABLE dates
+	int uid
+	datetime time
+
+TABLE rooms
+	int uid
+	string name
+
+
+-------------------
+
+maximum # rooms available
+quotas on rooms created by single user (store in session variable)
+
+Types of Requests to limit:
+	- send message into chat (socket)
+	- send new modification (socket)
+	- create new room (post) (but since there's a limit this doesn't really matter)
+
+session stores moving average of message_rate and mod_rate and checks against quota table for violations
