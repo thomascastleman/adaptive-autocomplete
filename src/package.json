@@ -14,7 +14,7 @@
     "autocomplete"
   ],
   "author": "Johnny Lindbergh and Thomas Castleman",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/thomascastleman/adaptive-autocomplete/issues"
   },
