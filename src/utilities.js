@@ -173,7 +173,7 @@ function transferSwapToStable(callback) {
 // construct stable tree from given tree table
 function constructFromDatabase(table_name, callback) {
 	// pull tree data from db
-	con.query('SELECT * FROM ' + table_name + ';', function(err, result) {
+	con.query('SELECT * FROM ?;', [table_name], function(err, result) {
 		var idToNode = new Array();	// temp link ids to node objects
 		idToNode[0] = global.stableTree.root;
 
